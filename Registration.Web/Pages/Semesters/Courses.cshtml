@@ -1,0 +1,194 @@
+﻿@page
+@model Registration.Web.Pages.Semesters.CoursesModel
+@{
+    ViewData["Title"] = $"Courses for {Model.SemesterName}";
+}
+
+<div class="container-fluid px-4 py-4" style="background-color: #f8f9fa; min-height: 90vh;">
+    <!-- Modern Header Section -->
+    <div class="row align-items-center mb-4 g-3">
+        <div class="col-xl-6 col-md-5">
+            <div class="d-flex align-items-center gap-3">
+                <div class="bg-primary bg-opacity-10 text-primary p-3 rounded-4 d-flex align-items-center justify-content-center shadow-sm" style="width: 56px; height: 56px;">
+                    <span class="fs-4">📚</span>
+                </div>
+                <div>
+                    <h2 class="fw-bold text-dark mb-1 tracking-tight">@Model.SemesterName Courses</h2>
+                    <p class="text-muted mb-0 fs-6">Manage and assign curriculum courses active for this academic term.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-6 col-md-7">
+            <div class="d-flex align-items-center justify-content-md-end gap-2 flex-wrap">
+                <a href="/Semesters" class="btn btn-light border text-secondary shadow-sm px-4 py-2 rounded-pill fw-semibold hover-lift">
+                    ← Back to Semesters
+                </a>
+                <button type="button" class="btn btn-primary shadow-sm px-4 py-2 rounded-pill fw-semibold hover-lift" data-bs-toggle="modal" data-bs-target="#addCourseModal">
+                    + Add Course to Semester
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Alert Banners -->
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show rounded-4 shadow-sm mb-4 border-0 bg-danger bg-opacity-10 text-danger py-3 px-4">
+            <div class="d-flex align-items-center">
+                <span class="me-3 fs-4">⚠️</span>
+                <div class="fw-semibold">@TempData["ErrorMessage"]</div>
+            </div>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show rounded-4 shadow-sm mb-4 border-0 bg-success bg-opacity-10 text-success py-3 px-4">
+            <div class="d-flex align-items-center">
+                <span class="me-3 fs-4">✅</span>
+                <div class="fw-semibold">@TempData["SuccessMessage"]</div>
+            </div>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <!-- Main Card Container -->
+    <div class="card shadow-sm border-0 rounded-4 overflow-hidden bg-white">
+        <!-- Search & Filter Toolbar -->
+        <div class="card-header bg-white border-bottom py-4 px-4">
+            <div class="row align-items-center g-3">
+                <div class="col-lg-5 col-md-6">
+                    <div class="input-group input-group-lg bg-light border rounded-pill overflow-hidden shadow-none">
+                        <span class="input-group-text bg-transparent border-0 ps-4 text-muted">🔍</span>
+                        <input type="text" id="searchInput" class="form-control border-0 bg-transparent shadow-none fs-6 ps-2" placeholder="Search by code or course name..." onkeyup="filterTable()">
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-6">
+                    <select id="departmentFilter" class="form-select form-select-lg bg-light border rounded-pill shadow-none fs-6 px-4" onchange="filterTable()">
+                        <option value="">All Departments</option>
+                        @foreach (var dept in Model.AllDepartmentsList)
+                        {
+                            <option value="@dept.Code">@dept.Name (@dept.Code)</option>
+                        }
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0 text-nowrap" id="coursesTable">
+                    <thead class="bg-light text-uppercase fs-7 text-muted fw-bold">
+                        <tr>
+                            <th class="py-3 ps-4" style="width: 15%;">Code</th>
+                            <th class="py-3" style="width: 30%;">Course Name</th>
+                            <th class="py-3" style="width: 15%;">Department</th>
+                            <th class="py-3" style="width: 12%;">Credit Hours</th>
+                            <th class="py-3" style="width: 13%;">Difficulty</th>
+                            <th class="py-3 text-end pe-4" style="width: 15%;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model.SemesterCoursesList != null && Model.SemesterCoursesList.Any())
+                        {
+                            foreach (var item in Model.SemesterCoursesList)
+                            {
+                                <tr data-department="@item.DepartmentCode">
+                                    <td class="ps-4 fw-bold text-primary">@item.CourseCode</td>
+                                    <td class="fw-bold text-dark py-3">@item.CourseName</td>
+                                    <td>
+                                        <span class="badge bg-light text-secondary border px-3 py-2 rounded-pill fw-semibold">
+                                            @item.DepartmentCode
+                                        </span>
+                                    </td>
+                                    <td class="text-secondary fw-medium">@item.Credit_Hours hrs</td>
+                                    <td>
+                                        <span class="badge bg-info bg-opacity-10 text-info border border-info border-opacity-25 px-3 py-2 rounded-pill fw-semibold">
+                                            Level @item.Difficulty
+                                        </span>
+                                    </td>
+                                    <td class="text-end pe-4">
+                                        <form method="post" asp-page-handler="Delete" asp-route-id="@item.Id" asp-route-semesterId="@Model.SemesterId" class="d-inline">
+                                            <button type="submit" class="btn btn-sm btn-light border text-danger fw-semibold rounded-pill px-3 py-1 shadow-sm" onclick="return confirm('Remove @item.CourseName from @Model.SemesterName?');">
+                                                🗑️ Remove
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="6" class="text-center py-5 text-muted">
+                                    <div class="py-4">
+                                        <span class="fs-1 d-block mb-2">📚</span>
+                                        <p class="mb-0 fw-semibold">No courses have been assigned to this semester yet.</p>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Course Modal -->
+<div class="modal fade" id="addCourseModal" tabindex="-1" aria-labelledby="addCourseModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-md">
+        <div class="modal-content rounded-4 border-0 shadow-lg">
+            <div class="modal-header border-0 pb-0 px-4 pt-4">
+                <h5 class="modal-title fw-bold text-dark" id="addCourseModalLabel">Add Course to @Model.SemesterName</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body px-4 py-3">
+                <form method="post" asp-page-handler="AddCourse" asp-route-semesterId="@Model.SemesterId">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold text-secondary small text-uppercase">Select Course</label>
+                        <select name="NewAssignment.Course_Id" class="form-select form-select-lg rounded-3 border-light bg-light" required>
+                            <option value="">-- Choose a Course --</option>
+                            @foreach (var course in Model.AllCoursesList)
+                            {
+                                <option value="@course.Id">[@course.Code] @course.Name (@course.Credit_Hours Credits)</option>
+                            }
+                        </select>
+                    </div>
+
+                    <div class="d-flex justify-content-end gap-2 pt-2 border-top">
+                        <button type="button" class="btn btn-light px-4 py-2.5 rounded-pill fw-semibold text-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary px-5 py-2.5 rounded-pill fw-semibold shadow-sm">Assign Course</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function filterTable() {
+            let input = document.getElementById("searchInput").value.toLowerCase();
+            let selectedDept = document.getElementById("departmentFilter").value.toLowerCase();
+            let rows = document.querySelectorAll("#coursesTable tbody tr");
+
+            rows.forEach(row => {
+                if (row.cells.length < 6) return; // Skip empty state row
+
+                let code = row.cells[0].textContent.toLowerCase();
+                let name = row.cells[1].textContent.toLowerCase();
+                let rowDept = row.getAttribute("data-department").toLowerCase();
+
+                let matchesSearch = code.includes(input) || name.includes(input);
+                let matchesDept = selectedDept === "" || rowDept === selectedDept;
+
+                if (matchesSearch && matchesDept) {
+                    row.style.display = "";
+                } else {
+                    row.style.display = "none";
+                }
+            });
+        }
+    </script>
+}

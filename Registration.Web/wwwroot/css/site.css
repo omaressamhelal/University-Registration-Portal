@@ -1,0 +1,185 @@
+﻿html {
+    font-size: 14px;
+}
+
+@media (min-width: 768px) {
+    html {
+        font-size: 16px;
+    }
+}
+
+.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
+    box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
+}
+
+html {
+    position: relative;
+    min-height: 100%;
+}
+
+body {
+    margin-bottom: 60px;
+}
+
+.form-floating > .form-control-plaintext::placeholder, .form-floating > .form-control::placeholder {
+    color: var(--bs-secondary-color);
+    text-align: end;
+}
+
+.form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
+    text-align: start;
+}
+
+/* ==========================================================
+   BULLETPROOF GLOBAL DARK MODE OVERRIDES
+   ========================================================== */
+
+/* 1. Main Layout Containers */
+[data-bs-theme="dark"] .card,
+[data-bs-theme="dark"] .card-header,
+[data-bs-theme="dark"] .card-footer,
+[data-bs-theme="dark"] .modal-content,
+[data-bs-theme="dark"] .modal-header,
+[data-bs-theme="dark"] .modal-footer {
+    background-color: #212529 !important;
+    border-color: #373b3e !important;
+    color: #f8f9fa !important;
+}
+
+/* Force dark mode on big wrappers, but IGNORE buttons and badges so they keep their original colors */
+[data-bs-theme="dark"] div[class*="bg-white"]:not(.btn):not(.badge),
+[data-bs-theme="dark"] div[class*="bg-light"]:not(.btn):not(.badge),
+[data-bs-theme="dark"] div[style*="background"]:not(.btn):not(.badge) {
+    background-color: #212529 !important;
+    color: #f8f9fa !important;
+}
+
+/* 2. Headings & Main Text */
+[data-bs-theme="dark"] h1,
+[data-bs-theme="dark"] h2,
+[data-bs-theme="dark"] h3,
+[data-bs-theme="dark"] h4,
+[data-bs-theme="dark"] h5,
+[data-bs-theme="dark"] h6,
+[data-bs-theme="dark"] .text-dark:not(.badge):not(.btn) {
+    color: #f8f9fa !important;
+}
+
+[data-bs-theme="dark"] .text-muted {
+    color: #adb5bd !important;
+}
+
+/* 3. Table Adjustments */
+[data-bs-theme="dark"] .table {
+    color: #f8f9fa !important;
+}
+
+    [data-bs-theme="dark"] .table thead,
+    [data-bs-theme="dark"] .table-light,
+    [data-bs-theme="dark"] .table-light > th,
+    [data-bs-theme="dark"] .table-light > td {
+        background-color: #2b3035 !important;
+        color: #f8f9fa !important;
+        border-color: #373b3e !important;
+    }
+
+    /* Base text color for table cells */
+    [data-bs-theme="dark"] .table td,
+    [data-bs-theme="dark"] .table th {
+        color: #f8f9fa !important;
+    }
+
+    /* Turn regular links blue, ignore buttons */
+    [data-bs-theme="dark"] .table a:not(.btn) {
+        color: #6ea8fe !important;
+    }
+
+    /* ==========================================================
+   4. THE BADGE & BUTTON FIX
+   ========================================================== */
+
+    /* Force plain bordered badges (Department & Year) to stay Light Pill / Dark Text */
+    [data-bs-theme="dark"] .table td .badge.border:not(.bg-opacity-10) {
+        background-color: #f8f9fa !important;
+        color: #212529 !important;
+        border-color: #dee2e6 !important;
+    }
+
+    /* Restore the subtle grey text color specifically for the 'Year' badge */
+    [data-bs-theme="dark"] .table td .badge.text-secondary {
+        color: #6c757d !important;
+    }
+
+/* Fix for dark transparent badges ("Dismissed", "Expelled") */
+[data-bs-theme="dark"] .badge.text-dark.bg-opacity-10 {
+    color: #f8f9fa !important;
+    background-color: rgba(255, 255, 255, 0.1) !important;
+    border-color: rgba(255, 255, 255, 0.25) !important;
+}
+
+/* Make light buttons adapt to dark mode (Dark pills, light default text, preserves Bootstrap text colors!) */
+[data-bs-theme="dark"] .btn-light,
+[data-bs-theme="dark"] .btn-white,
+[data-bs-theme="dark"] .btn.bg-white {
+    background-color: #2b3035 !important;
+    border-color: #495057 !important;
+    color: #f8f9fa;
+}
+
+    [data-bs-theme="dark"] .btn-light:hover,
+    [data-bs-theme="dark"] .btn-white:hover,
+    [data-bs-theme="dark"] .btn.bg-white:hover {
+        background-color: #343a40 !important;
+        border-color: #6c757d !important;
+        color: #ffffff;
+    }
+
+/* ==========================================================
+   5. Form Inputs & Select Dropdowns (🌟 Bulletproof Dark Mode Fix)
+   ========================================================== */
+[data-bs-theme="dark"] .form-control,
+[data-bs-theme="dark"] .form-select,
+[data-bs-theme="dark"] select.form-select,
+[data-bs-theme="dark"] input.form-control,
+[data-bs-theme="dark"] .form-control.bg-light,
+[data-bs-theme="dark"] .form-select.bg-light,
+[data-bs-theme="dark"] .form-control.bg-white,
+[data-bs-theme="dark"] .form-select.bg-white {
+    background-color: #2b3035 !important;
+    color: #f8f9fa !important;
+    border-color: #495057 !important;
+    color-scheme: dark !important;
+}
+
+    [data-bs-theme="dark"] .form-control:focus,
+    [data-bs-theme="dark"] .form-select:focus,
+    [data-bs-theme="dark"] .form-control:active,
+    [data-bs-theme="dark"] .form-select:active {
+        background-color: #2b3035 !important;
+        color: #f8f9fa !important;
+        border-color: #0d6efd !important;
+        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25) !important;
+        color-scheme: dark !important;
+    }
+
+    [data-bs-theme="dark"] .form-control::placeholder {
+        color: #adb5bd !important;
+    }
+
+    /* Explicit dark styling for dropdown option items */
+    [data-bs-theme="dark"] .form-select option,
+    [data-bs-theme="dark"] .form-control option {
+        background-color: #212529 !important;
+        color: #f8f9fa !important;
+    }
+
+/* Fix browser autofill background flashing white */
+[data-bs-theme="dark"] input:-webkit-autofill,
+[data-bs-theme="dark"] input:-webkit-autofill:hover,
+[data-bs-theme="dark"] input:-webkit-autofill:focus,
+[data-bs-theme="dark"] textarea:-webkit-autofill,
+[data-bs-theme="dark"] select:-webkit-autofill {
+    -webkit-text-fill-color: #f8f9fa !important;
+    -webkit-box-shadow: 0 0 0px 1000px #2b3035 inset !important;
+    transition: background-color 5000s ease-in-out 0s;
+}

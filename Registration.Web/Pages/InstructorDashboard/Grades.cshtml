@@ -1,0 +1,196 @@
+﻿@page "{courseId:int}"
+@model Registration.Web.Pages.InstructorDashboard.GradesModel
+@{
+    ViewData["Title"] = "Enter Grades";
+}
+
+<div class="container-fluid px-4 py-4" style="min-height: 90vh; background-color: #f8f9fa;">
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show mb-4 rounded-4 shadow-sm border-0 bg-success bg-opacity-10 text-success py-3 px-4" role="alert">
+            <div class="d-flex align-items-center">
+                <span class="me-3 fs-4">✨</span>
+                <div class="fw-semibold"><strong>Success:</strong> @TempData["SuccessMessage"]</div>
+            </div>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <!-- Grade Sheet Form Wrapping Header & Table -->
+    <form method="post" asp-page-handler="SaveGrades" asp-route-courseId="@Model.CourseId">
+        <!-- Modern Header Section -->
+        <div class="row align-items-center mb-4 g-3 bg-white p-4 rounded-4 shadow-sm border">
+            <div class="col-xl-6 col-md-5">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="bg-primary bg-opacity-10 text-primary p-3 rounded-4 d-flex align-items-center justify-content-center shadow-sm" style="width: 56px; height: 56px; min-width: 56px;">
+                        <span class="fs-4">📝</span>
+                    </div>
+                    <div>
+                        <!-- 🌟 UPDATED: Using Model.DisplayCourseName to dynamically print the correct course title -->
+                        <h2 class="fw-bold mb-0 text-dark tracking-tight">
+                            @Model.DisplayCourseName — Grade Management
+                        </h2>
+                        <p class="text-muted mb-0 fs-6">Enter and update student grades for midterm, coursework, and final exams.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-6 col-md-7 text-md-end">
+                <div class="d-flex align-items-center justify-content-md-end gap-2 flex-wrap">
+                    <button type="submit" class="btn btn-success shadow-sm px-4 py-2 rounded-pill fw-semibold hover-lift d-inline-flex align-items-center gap-2 text-white">
+                        <span>💾</span> Save All Changes
+                    </button>
+                    <button type="submit" asp-page-handler="ResetGrades" asp-route-courseId="@Model.CourseId" class="btn btn-outline-danger shadow-sm px-4 py-2 rounded-pill fw-semibold hover-lift d-inline-flex align-items-center gap-2" onclick="return confirm('Are you sure you want to reset all grades for this course?');">
+                        <span>🔄</span> Reset Grades
+                    </button>
+                    <a asp-page="./CourseRoster" asp-route-courseId="@Model.CourseId" class="btn btn-light border text-secondary shadow-sm px-4 py-2 rounded-pill fw-semibold hover-lift">
+                        ← Back to Roster
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Grade Sheet Card Container -->
+        <div class="card shadow-sm border-0 rounded-4 overflow-hidden bg-white">
+            <div class="card-header bg-white border-bottom py-4 px-4 d-flex justify-content-between align-items-center flex-wrap gap-3">
+                <h5 class="fw-bold mb-0 text-primary d-flex align-items-center gap-2">
+                    <span>📊</span> Student Grade Sheet
+                </h5>
+                <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 px-3 py-2 rounded-pill fw-bold">
+                    @(Model.StudentGrades != null ? Model.StudentGrades.Count : 0) Students
+                </span>
+            </div>
+
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="text-uppercase fs-7 text-muted fw-bold bg-light">
+                            <tr>
+                                <th class="py-3 ps-4">Enrollment ID</th>
+                                <th class="py-3">Student Name</th>
+                                <th class="py-3 text-center" style="width: 14%;">Midterm</th>
+                                <th class="py-3 text-center" style="width: 14%;">Coursework</th>
+                                <th class="py-3 text-center" style="width: 14%;">Final Exam</th>
+                                <th class="py-3 text-center" style="width: 12%;">Total Score</th>
+                                <th class="py-3 text-center pe-4" style="width: 12%;">Letter Grade</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (Model.StudentGrades != null && Model.StudentGrades.Any())
+                            {
+                                foreach (var item in Model.StudentGrades)
+                                {
+                                    string letter = "—";
+                                    string badgeClass = "bg-secondary bg-opacity-10 text-secondary border";
+
+                                    if (item.TotalGrade != null)
+                                    {
+                                        decimal total = item.TotalGrade.Value;
+                                        if (total >= 90) { letter = "A"; badgeClass = "bg-success bg-opacity-10 text-success border-success"; }
+                                        else if (total >= 80) { letter = "B"; badgeClass = "bg-primary bg-opacity-10 text-primary border-primary"; }
+                                        else if (total >= 70) { letter = "C"; badgeClass = "bg-info bg-opacity-10 text-info border-info"; }
+                                        else if (total >= 60) { letter = "D"; badgeClass = "bg-warning bg-opacity-10 text-warning border-warning"; }
+                                        else { letter = "F"; badgeClass = "bg-danger bg-opacity-10 text-danger border-danger"; }
+                                    }
+
+                                    <tr class="grade-row" data-enrollment-id="@item.EnrollmentId">
+                                        <td class="ps-4 fw-bold text-secondary">@item.EnrollmentId</td>
+                                        <td class="fw-bold text-dark">@item.StudentName</td>
+
+                                        <td class="text-center">
+                                            <input type="number" step="0.01" min="0" max="100" class="form-control text-center bg-light border-0 py-2 rounded-3 fw-semibold shadow-xs grade-input midterm-input" name="Midterm[@item.EnrollmentId]" value="@item.MidtermGrade" placeholder="—" />
+                                        </td>
+                                        <td class="text-center">
+                                            <input type="number" step="0.01" min="0" max="100" class="form-control text-center bg-light border-0 py-2 rounded-3 fw-semibold shadow-xs grade-input coursework-input" name="CourseWork[@item.EnrollmentId]" value="@item.CourseWorkGrade" placeholder="—" />
+                                        </td>
+                                        <td class="text-center">
+                                            <input type="number" step="0.01" min="0" max="100" class="form-control text-center bg-light border-0 py-2 rounded-3 fw-semibold shadow-xs grade-input final-input" name="Final[@item.EnrollmentId]" value="@item.FinalGrade" placeholder="—" />
+                                        </td>
+
+                                        <td class="text-center fw-bold text-primary fs-6 total-score">
+                                            @(item.TotalGrade?.ToString("0.##") ?? "—")
+                                        </td>
+
+                                        <td class="text-center pe-4">
+                                            <span class="badge @badgeClass border border-opacity-25 px-3 py-2 rounded-pill fw-bold letter-badge">
+                                                @letter
+                                            </span>
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                            else
+                            {
+                                <tr>
+                                    <td colspan="7" class="text-center py-5 text-muted">
+                                        <div class="py-4">
+                                            <span class="fs-1 d-block mb-2">📭</span>
+                                            <p class="mb-0 fw-semibold">No students found enrolled in this course.</p>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+<style>
+    .hover-lift:hover {
+        transform: translateY(-2px);
+        transition: all 0.2s ease-in-out;
+    }
+
+    .shadow-xs {
+        box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+    }
+</style>
+
+<!-- REAL-TIME PARTIAL TOTAL & LETTER GRADE CALCULATOR SCRIPT -->
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const rows = document.querySelectorAll(".grade-row");
+
+        rows.forEach(row => {
+            const inputs = row.querySelectorAll(".grade-input");
+            const totalCell = row.querySelector(".total-score");
+            const letterBadge = row.querySelector(".letter-badge");
+
+            inputs.forEach(input => {
+                input.addEventListener("input", () => {
+                    const midterm = parseFloat(row.querySelector(".midterm-input").value) || 0;
+                    const coursework = parseFloat(row.querySelector(".coursework-input").value) || 0;
+                    const final = parseFloat(row.querySelector(".final-input").value) || 0;
+
+                    const hasAnyInput = row.querySelector(".midterm-input").value !== "" ||
+                                        row.querySelector(".coursework-input").value !== "" ||
+                                        row.querySelector(".final-input").value !== "";
+
+                    if (!hasAnyInput) {
+                        totalCell.textContent = "—";
+                        letterBadge.textContent = "—";
+                        letterBadge.className = "badge bg-secondary bg-opacity-10 text-secondary border border-opacity-25 px-3 py-2 rounded-pill fw-bold letter-badge";
+                        return;
+                    }
+
+                    const sum = midterm + coursework + final;
+                    totalCell.textContent = sum.toFixed(2).replace(/\.?0+$/, "");
+
+                    let letter = "F";
+                    let badgeClass = "bg-danger bg-opacity-10 text-danger border-danger";
+
+                    if (sum >= 90) { letter = "A"; badgeClass = "bg-success bg-opacity-10 text-success border-success"; }
+                    else if (sum >= 80) { letter = "B"; badgeClass = "bg-primary bg-opacity-10 text-primary border-primary"; }
+                    else if (sum >= 70) { letter = "C"; badgeClass = "bg-info bg-opacity-10 text-info border-info"; }
+                    else if (sum >= 60) { letter = "D"; badgeClass = "bg-warning bg-opacity-10 text-warning border-warning"; }
+
+                    letterBadge.textContent = letter;
+                    letterBadge.className = `badge ${badgeClass} border border-opacity-25 px-3 py-2 rounded-pill fw-bold letter-badge`;
+                });
+            });
+        });
+    });
+</script>

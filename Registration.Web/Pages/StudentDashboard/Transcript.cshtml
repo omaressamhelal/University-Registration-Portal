@@ -1,0 +1,190 @@
+﻿@page
+@model Registration.Web.Pages.StudentDashboard.TranscriptModel
+@{
+    ViewData["Title"] = "Academic Transcript";
+}
+
+<!-- Bootstrap Icons stylesheet -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+<div class="container-fluid py-4 px-md-5">
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger shadow-sm mb-4 border-0 rounded-4" role="alert">
+            <h5 class="alert-heading fw-bold"><i class="bi bi-exclamation-triangle me-2"></i>Background Error Detected</h5>
+            <p class="mb-0">@TempData["ErrorMessage"]</p>
+        </div>
+    }
+
+    @if (Model.StudentProfile != null && !string.IsNullOrEmpty(Model.StudentProfile.StudentName))
+    {
+        <!-- Page Header -->
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 pb-2 gap-3">
+            <div>
+                <div class="d-flex align-items-center gap-2 mb-1">
+                    <h2 class="display-6 fw-bolder text-dark mb-0" style="letter-spacing: -1px;">Official Academic Transcript</h2>
+                    <span class="badge bg-dark bg-opacity-10 text-dark border px-3 py-1.5 rounded-pill fs-6 fw-semibold shadow-sm d-flex align-items-center">
+                        <i class="bi bi-mortarboard-fill me-2 text-primary"></i> Complete History
+                    </span>
+                </div>
+                <p class="text-muted fs-5 mb-0">Comprehensive academic record for <strong class="text-dark">@Model.StudentProfile.StudentName</strong> (@Model.StudentProfile.DepartmentCode)</p>
+            </div>
+            <div>
+                <a asp-page="./Index" class="btn btn-outline-secondary bg-white border shadow-sm rounded-pill px-4 py-2 fw-semibold hover-lift">
+                    <i class="bi bi-arrow-left me-1"></i> Back to Dashboard
+                </a>
+            </div>
+        </div>
+
+        <!-- Quick Stats Row -->
+        <div class="row g-4 mb-4">
+            <div class="col-md-4">
+                <div class="card border-0 shadow-sm rounded-4 bg-light bg-gradient p-4 h-100 hover-lift-card border border-light-subtle">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <span class="text-muted small text-uppercase fw-bold" style="letter-spacing: 0.5px;">Total Courses Taken</span>
+                        <i class="bi bi-journal-album text-secondary opacity-50 fs-4"></i>
+                    </div>
+                    <h2 class="display-5 fw-bolder text-dark mb-0">@Model.TotalCoursesTaken</h2>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card border-0 shadow-sm rounded-4 text-white p-4 h-100 hover-lift-card position-relative overflow-hidden" style="background: linear-gradient(135deg, #0d6efd 0%, #0dcaf0 100%);">
+                    <i class="bi bi-award position-absolute opacity-25" style="font-size: 6rem; right: -10px; bottom: -15px;"></i>
+                    <div class="position-relative z-1">
+                        <span class="text-white-50 small text-uppercase fw-bold d-block mb-1" style="letter-spacing: 0.5px;">True Cumulative GPA</span>
+                        <h2 class="display-5 fw-bolder text-white mb-0">@Model.CalculateCumulativeGpa()</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card border-0 shadow-sm rounded-4 bg-light bg-gradient p-4 h-100 hover-lift-card border border-light-subtle d-flex flex-column justify-content-center align-items-center text-center">
+                    <span class="text-muted small text-uppercase fw-bold d-block mb-3" style="letter-spacing: 0.5px;">Academic Standing</span>
+                    <span class="badge bg-success bg-opacity-10 text-success border border-success-subtle px-5 py-2 fs-5 rounded-pill shadow-sm w-100">
+                        Active
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Semester Boxes -->
+        @if (Model.Semesters != null && Model.Semesters.Any())
+        {
+            @foreach (var semester in Model.Semesters)
+            {
+                <div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-4 hover-lift-card">
+                    <div class="card-header bg-white border-bottom py-4 px-4 d-flex justify-content-between align-items-center flex-wrap gap-3">
+                        <div class="d-flex align-items-center">
+                            <div class="bg-primary bg-opacity-10 text-primary rounded-circle d-flex justify-content-center align-items-center me-3" style="width: 40px; height: 40px;">
+                                <i class="bi bi-calendar3"></i>
+                            </div>
+                            <h4 class="fw-bold text-dark mb-0">@semester.SemesterName</h4>
+                        </div>
+                        <div class="d-flex gap-2 flex-wrap">
+                            <span class="badge bg-success bg-opacity-10 text-success border border-success-subtle px-3 py-2 rounded-pill fs-6 fw-semibold shadow-sm">
+                                📚 @semester.TotalCredits Credits
+                            </span>
+                            <span class="badge bg-primary bg-opacity-10 text-primary border border-primary-subtle px-3 py-2 rounded-pill fs-6 fw-semibold shadow-sm">
+                                <i class="bi bi-collection"></i> @semester.Courses.Count Courses
+                            </span>
+                        </div>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0 table-borderless">
+                                <thead class="bg-light text-muted fw-bold text-uppercase" style="font-size: 0.75rem; letter-spacing: 1px;">
+                                    <tr class="border-bottom">
+                                        <th class="py-3 ps-4 rounded-top-start">Course Name & Code</th>
+                                        <th class="py-3 text-center">Credit Hours</th>
+                                        <th class="py-3 text-end pe-4 rounded-top-end">Total Grade</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var course in semester.Courses)
+                                    {
+                                        <tr class="border-bottom border-light-subtle hover-bg-light transition-hover">
+                                            <td class="ps-4 py-4">
+                                                <div class="d-flex align-items-center">
+                                                    <div class="bg-white border shadow-sm text-primary rounded-circle d-flex justify-content-center align-items-center me-3" style="width: 44px; height: 44px;">
+                                                        <i class="bi bi-journal-check fs-5"></i>
+                                                    </div>
+                                                    <div>
+                                                        <span class="fs-6 fw-bold text-dark d-block mb-1">@course.CourseName</span>
+                                                        <span class="badge bg-light text-muted border border-secondary-subtle" style="font-size: 0.7rem;">@course.CourseCode</span>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td class="text-center">
+                                                <span class="badge bg-light text-dark border shadow-sm px-3 py-2 fs-6 fw-semibold" style="min-width: 40px;">
+                                                    @course.CreditHours
+                                                </span>
+                                            </td>
+                                            <td class="text-end pe-4">
+                                                @if (course.TotalGrade.HasValue)
+                                                {
+                                                    var letterGrade = Model.GetLetterGrade(course.TotalGrade);
+                                                    var isExcellent = letterGrade.StartsWith("A") || letterGrade.StartsWith("B");
+                                                    var isAverage = letterGrade.StartsWith("C");
+
+                                                    var badgeBg = isExcellent ? "bg-success" : isAverage ? "bg-warning" : "bg-danger";
+                                                    var badgeText = isExcellent ? "text-white" : isAverage ? "text-dark" : "text-white";
+
+                                                    <span class="badge @badgeBg @badgeText bg-gradient px-4 py-2 fs-6 fw-bold shadow-sm rounded-pill" style="min-width: 65px;">
+                                                        @letterGrade
+                                                    </span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary-subtle px-4 py-2 fs-6 rounded-pill fw-bold">
+                                                        Not Graded
+                                                    </span>
+                                                }
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+        else
+        {
+            <div class="card border-0 shadow-sm rounded-4 text-center py-5">
+                <div class="card-body">
+                    <i class="bi bi-inbox fs-1 d-block mb-2 text-secondary opacity-50"></i>
+                    <p class="mb-0 fs-5 fw-medium text-dark">No course registrations found.</p>
+                    <p class="text-muted small">Your transcript will update once you complete your first semester.</p>
+                </div>
+            </div>
+        }
+    }
+</div>
+
+<style>
+    .hover-lift {
+        transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+    }
+
+        .hover-lift:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 .5rem 1rem rgba(0,0,0,.15) !important;
+        }
+
+    .hover-lift-card {
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+        .hover-lift-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 .5rem 1.5rem rgba(0,0,0,.08) !important;
+        }
+
+    .hover-bg-light:hover {
+        background-color: #f8f9fa;
+    }
+
+    .transition-hover {
+        transition: background-color 0.2s ease;
+    }
+</style>

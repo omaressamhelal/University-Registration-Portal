@@ -1,0 +1,23 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <RootNamespace>Registration.DataAccess_</RootNamespace>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+
+	<ItemGroup>
+		<PackageReference Include="Microsoft.Data.SqlClient" Version="7.0.2" />
+		<PackageReference Include="Microsoft.Extensions.Configuration" Version="10.0.11" />
+		<PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="10.0.11" />
+		<PackageReference Include="Pastel" Version="8.0.0" />
+	</ItemGroup>
+
+
+	<ItemGroup>
+	  <ProjectReference Include="..\Registration.Domain\Registration.Domain.csproj" />
+	</ItemGroup>
+
+</Project>

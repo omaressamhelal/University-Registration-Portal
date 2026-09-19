@@ -1,0 +1,153 @@
+﻿@page "{id:int}"
+@model Registration.Web.Pages.Instructors.DetailsModel
+@{
+    ViewData["Title"] = "Instructor Profile Details";
+    // Extracts the first letter of the name for the avatar icon
+    var initial = !string.IsNullOrEmpty(Model.InstructorDetails?.InstructorName)
+                  ? Model.InstructorDetails.InstructorName.Substring(0, 1).ToUpper()
+                  : "I";
+}
+
+<div class="container mt-4 mb-5">
+    <!-- Page Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
+        <div>
+            <h2 class="fw-bold text-dark mb-1">Instructor Profile</h2>
+            <p class="text-muted mb-0">Detailed faculty records and course assignments.</p>
+        </div>
+        <div>
+            <a asp-page="/Instructors/Index" class="btn btn-outline-secondary shadow-sm px-4">← Back to Directory</a>
+        </div>
+    </div>
+
+    <!-- Success / Error Alert Banners -->
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show rounded-4 shadow-sm mb-4 border-0 bg-success bg-opacity-10 text-success" role="alert">
+            <div class="d-flex align-items-center">
+                <span class="me-2 fs-5">✅</span>
+                <div class="fw-semibold">@TempData["SuccessMessage"]</div>
+            </div>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show rounded-4 shadow-sm mb-4 border-0 bg-danger bg-opacity-10 text-danger" role="alert">
+            <div class="d-flex align-items-center">
+                <span class="me-2 fs-5">⚠️</span>
+                <div class="fw-semibold">@TempData["ErrorMessage"]</div>
+            </div>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    @if (Model.InstructorDetails == null)
+    {
+        <div class="alert alert-danger rounded-4 shadow-sm border-0">Instructor record not found.</div>
+    }
+    else
+    {
+        <div class="row g-4 justify-content-center">
+            <!-- Left Column: Personal & Academic Summary Card -->
+            <div class="col-lg-4">
+                <div class="card shadow-sm border-0 rounded-4 p-4 text-center h-100">
+                    <div class="card-body d-flex flex-column align-items-center justify-content-center">
+                        <div class="mb-3">
+                            <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center fw-bold fs-1 shadow-sm mx-auto" style="width: 90px; height: 90px;">
+                                @initial
+                            </div>
+                        </div>
+                        <h4 class="fw-bold text-dark mb-1">@Model.InstructorDetails.InstructorName</h4>
+                        <p class="text-muted small mb-4">@Model.InstructorDetails.Email</p>
+
+                        <div class="w-100 text-start border-top pt-3">
+                            <div class="d-flex justify-content-between mb-2">
+                                <span class="text-muted">National ID:</span>
+                                <span class="fw-semibold text-dark">@Model.InstructorDetails.National_Id</span>
+                            </div>
+                            <div class="d-flex justify-content-between mb-2">
+                                <span class="text-muted">Department:</span>
+                                <span class="fw-semibold text-dark">@Model.InstructorDetails.DepartmentName</span>
+                            </div>
+                            <div class="d-flex justify-content-between mb-2">
+                                <span class="text-muted">Start Year:</span>
+                                <span class="fw-semibold text-dark">@Model.InstructorDetails.Start_year</span>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <span class="text-muted">Salary:</span>
+                                <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 px-3 py-1.5 rounded-pill fw-bold">
+                                    $@Model.InstructorDetails.Salary
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column: Course Assignments & Account Status Management -->
+            <div class="col-lg-8">
+                <!-- ASSIGNED COURSES BOX WITH SCROLLBAR -->
+                <div class="card shadow-sm border-0 rounded-4 p-4 mb-4">
+                    <div class="card-body">
+                        <h5 class="fw-bold text-dark mb-3 d-flex align-items-center">
+                            <span class="me-2">📚</span> Assigned Courses
+                        </h5>
+                        <div class="p-3 bg-light rounded-3 mb-2 overflow-auto" style="max-height: 210px;">
+                            @if (!string.IsNullOrEmpty(Model.InstructorDetails.TaughtCourses))
+                            {
+                                var courseNames = Model.InstructorDetails.TaughtCourses.Split(',');
+                                var courseCodes = Model.InstructorDetails.CourseCodes?.Split(',') ?? new string[0];
+
+                                for (int i = 0; i < courseNames.Length; i++)
+                                {
+                                    <div class="mb-2">
+                                        <div class="fw-semibold text-dark">@courseNames[i].Trim()</div>
+                                        @if (i < courseCodes.Length)
+                                        {
+                                            <div class="text-muted fs-7">Course Code: @courseCodes[i].Trim()</div>
+                                        }
+                                    </div>
+                                    @if (i < courseNames.Length - 1)
+                                    {
+                                        <hr class="my-2 text-muted opacity-25">
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                <div class="text-muted fst-italic">No courses currently assigned.</div>
+                            }
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ACCOUNT STATUS MANAGEMENT BOX -->
+                <div class="card shadow-sm border-0 rounded-4 p-4">
+                    <div class="card-body">
+                        <h5 class="fw-bold text-dark mb-3 d-flex align-items-center">
+                            <span class="me-2">🛡️</span> Account Status Management
+                        </h5>
+                        <div class="p-3 bg-light rounded-3">
+                            <form method="post" asp-page-handler="UpdateStatus" asp-route-id="@Model.InstructorDetails.Id" class="d-flex align-items-center gap-3">
+                                <select name="newStatus" class="form-select bg-white shadow-none" style="max-width: 250px;" required>
+                                    <option value="">-- Select Status --</option>
+                                    @if (Model.StatusesList != null)
+                                    {
+                                        foreach (var statusName in Model.StatusesList)
+                                        {
+                                            <option value="@statusName" selected="@(Model.InstructorDetails.StatusDescription == statusName)">
+                                                @statusName
+                                            </option>
+                                        }
+                                    }
+                                </select>
+                                <button type="submit" class="btn btn-primary px-4 shadow-sm">Update Status</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>

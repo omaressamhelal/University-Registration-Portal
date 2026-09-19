@@ -1,0 +1,165 @@
+﻿<!DOCTYPE html>
+<html lang="en" data-bs-theme="light">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - UniPortal</title>
+    <script type="importmap"></script>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/Registration.Web.styles.css" asp-append-version="true" />
+    <style>
+        body, .card, .navbar, .footer, .dropdown-menu, input, select {
+            transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+        }
+    </style>
+</head>
+<body class="bg-body text-body">
+    <header>
+        <nav id="mainNavbar" class="navbar navbar-expand-sm navbar-light bg-white border-bottom shadow-sm mb-4 py-3">
+            <div class="container-fluid px-4">
+                <!-- Branded Modern Logo -->
+                <a class="navbar-brand fw-bold text-primary d-flex align-items-center gap-2" asp-area="" asp-page="/Index">
+                    <span class="fs-4">🎓</span> UniPortal
+                </a>
+
+                <button class="navbar-toggler border-0 shadow-none" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
+                        aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
+                    <!-- Left Side: Main Navigation -->
+                    <ul class="navbar-nav flex-grow-1">
+                        @if (User.Identity == null || !User.Identity.IsAuthenticated)
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link fw-medium" asp-area="" asp-page="/Index">Home</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link fw-medium" asp-area="" asp-page="/Privacy">Privacy</a>
+                            </li>
+                        }
+                    </ul>
+
+                    <!-- Right Side: Modern User Profile Dropdown -->
+                    <ul class="navbar-nav align-items-center gap-3">
+                        @if (User.Identity != null && User.Identity.IsAuthenticated)
+                        {
+                            var fullName = User.Claims.FirstOrDefault(c => c.Type == "FullName")?.Value ?? User.Identity.Name ?? "User";
+                            var initial = fullName.Substring(0, 1).ToUpper();
+
+                            <li class="nav-item dropdown">
+                                <a id="profileDropdownBtn" class="btn btn-light rounded-pill border px-3 py-2 d-flex align-items-center gap-2 shadow-sm fw-semibold text-decoration-none" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <span class="bg-primary text-white rounded-circle d-flex justify-content-center align-items-center" style="width: 28px; height: 28px; font-size: 0.85rem;">@initial</span>
+                                    <span>Hello, @fullName!</span>
+                                    <small class="text-muted ms-1">▼</small>
+                                </a>
+                                <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0 mt-3 rounded-4 p-2" style="min-width: 220px;">
+                                    <li>
+                                        @if (User.IsInRole("Admin"))
+                                        {
+                                            <a class="dropdown-item py-2 rounded-3 fw-medium" asp-page="/AdminDashboard/Index">🎛️ My Dashboard</a>
+                                        }
+                                        else if (User.IsInRole("Instructor"))
+                                        {
+                                            <a class="dropdown-item py-2 rounded-3 fw-medium" asp-page="/InstructorDashboard/Index">🎛️ My Dashboard</a>
+                                        }
+                                        else
+                                        {
+                                            <a class="dropdown-item py-2 rounded-3 fw-medium" asp-page="/StudentDashboard/Index">🎛️ My Dashboard</a>
+                                        }
+                                    </li>
+
+                                    <li>
+                                        <button class="dropdown-item py-2 rounded-3 fw-medium d-flex align-items-center justify-content-between" type="button" id="darkModeToggle" onclick="toggleDarkMode()">
+                                            <span>🌙 Dark Mode</span>
+                                            <span class="badge bg-secondary bg-opacity-10 text-secondary rounded-pill px-2" id="modeIndicator">Off</span>
+                                        </button>
+                                    </li>
+
+                                    <li><hr class="dropdown-divider my-2"></li>
+
+                                    <li>
+                                        <a class="dropdown-item py-2 rounded-3 text-danger fw-bold" asp-area="" asp-page="/Logout">🚪 Logout</a>
+                                    </li>
+                                </ul>
+                            </li>
+                        }
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <div class="container">
+        <main role="main" class="pb-3">
+            @RenderBody()
+        </main>
+    </div>
+
+    <footer id="mainFooter" class="border-top footer text-muted mt-5 bg-white py-4">
+        <div class="container text-center">
+            &copy; 2026 - UniPortal - <a asp-area="" asp-page="/Privacy" class="text-decoration-none text-primary">Privacy Policy</a>
+        </div>
+    </footer>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const currentTheme = localStorage.getItem("theme") || "light";
+            applyTheme(currentTheme);
+        });
+
+        function toggleDarkMode() {
+            const currentTheme = document.documentElement.getAttribute("data-bs-theme");
+            const newTheme = currentTheme === "dark" ? "light" : "dark";
+            localStorage.setItem("theme", newTheme);
+            applyTheme(newTheme);
+        }
+
+        function applyTheme(theme) {
+            document.documentElement.setAttribute("data-bs-theme", theme);
+
+            const navbar = document.getElementById("mainNavbar");
+            const footer = document.getElementById("mainFooter");
+            const profileBtn = document.getElementById("profileDropdownBtn");
+
+            if (theme === "dark") {
+                // Dark mode styles for navbar and footer
+                navbar.className = "navbar navbar-expand-sm navbar-dark bg-dark border-bottom border-secondary shadow-sm mb-4 py-3";
+                footer.className = "border-top border-secondary footer text-muted mt-5 bg-dark py-4";
+                if (profileBtn) profileBtn.className = "btn btn-dark rounded-pill border border-secondary px-3 py-2 d-flex align-items-center gap-2 shadow-sm fw-semibold text-decoration-none text-white";
+            } else {
+                // Light mode styles
+                navbar.className = "navbar navbar-expand-sm navbar-light bg-white border-bottom shadow-sm mb-4 py-3";
+                footer.className = "border-top footer text-muted mt-5 bg-white py-4";
+                if (profileBtn) profileBtn.className = "btn btn-light rounded-pill border px-3 py-2 d-flex align-items-center gap-2 shadow-sm fw-semibold text-decoration-none text-dark";
+            }
+
+            updateToggleUI(theme);
+        }
+
+        function updateToggleUI(theme) {
+            const indicator = document.getElementById("modeIndicator");
+            const toggleBtn = document.getElementById("darkModeToggle");
+            if (!indicator) return;
+
+            if (theme === "dark") {
+                indicator.textContent = "On";
+                indicator.className = "badge bg-primary bg-opacity-25 text-primary rounded-pill px-2";
+                toggleBtn.querySelector("span:first-child").textContent = "☀️ Light Mode";
+            } else {
+                indicator.textContent = "Off";
+                indicator.className = "badge bg-secondary bg-opacity-10 text-secondary rounded-pill px-2";
+                toggleBtn.querySelector("span:first-child").textContent = "🌙 Dark Mode";
+            }
+        }
+    </script>
+
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

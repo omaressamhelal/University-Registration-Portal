@@ -1,0 +1,331 @@
+﻿@page
+@model Registration.Web.Pages.InstructorDashboard.IndexModel
+@{
+    ViewData["Title"] = "Faculty Dashboard";
+}
+
+<!-- Bootstrap Icons -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+<div class="container-fluid px-4 py-4" style="min-height: 92vh; background-color: #f8f9fa;">
+    @if (Model.InstructorProfile != null)
+    {
+        <!-- 🌟 PREMIUM GRADIENT HERO BANNER -->
+        <div class="card border-0 shadow-sm rounded-4 text-white mb-4 overflow-hidden position-relative hover-lift-card" style="background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);">
+            <div class="position-absolute top-0 end-0 p-4 opacity-10 d-none d-md-block">
+                <i class="bi bi-mortarboard-fill" style="font-size: 10rem; position: absolute; right: 20px; top: -30px;"></i>
+            </div>
+            <div class="card-body p-4 p-lg-5 position-relative z-1">
+                <div class="row align-items-center g-4">
+                    <div class="col-lg-7">
+                        <div class="d-flex align-items-center gap-3 mb-3">
+                            <span class="badge bg-success bg-opacity-25 text-white border border-white border-opacity-25 px-3 py-1.5 rounded-pill fw-semibold shadow-sm d-flex align-items-center gap-1">
+                                <i class="bi bi-check-circle-fill"></i> Active Faculty Member
+                            </span>
+                            <span class="badge bg-white bg-opacity-10 text-white border border-white border-opacity-10 px-3 py-1.5 rounded-pill shadow-sm d-flex align-items-center gap-1">
+                                <i class="bi bi-calendar3"></i> @Model.InstructorProfile.ActiveSemesterName
+                            </span>
+                        </div>
+                        <h1 class="fw-bolder display-6 mb-2" style="letter-spacing: -0.5px;">Welcome back, @Model.InstructorProfile.InstructorName!</h1>
+                        <p class="text-white-50 mb-0 fs-5">Manage your active teaching schedule, course rosters, and office hours seamlessly.</p>
+                    </div>
+                    <div class="col-lg-5 text-lg-end">
+                        <div class="d-flex align-items-center justify-content-lg-end gap-2 flex-wrap">
+                            <button type="button" class="btn btn-light shadow-sm px-4 py-2.5 rounded-pill fw-bold text-primary hover-lift d-flex align-items-center gap-2" data-bs-toggle="modal" data-bs-target="#editProfileModal">
+                                <i class="bi bi-pencil-square"></i> Edit Profile
+                            </button>
+                            <button type="button" class="btn btn-outline-light px-4 py-2.5 rounded-pill fw-bold hover-lift d-flex align-items-center gap-2" data-bs-toggle="modal" data-bs-target="#fullScheduleModal">
+                                <i class="bi bi-calendar-week"></i> View Full Schedule
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4">
+            <!-- Left Column: Employment Profile Sidebar -->
+            <div class="col-lg-4">
+                <div class="card shadow-sm border-0 rounded-4 h-100 bg-white hover-lift-card">
+                    <div class="card-header bg-transparent border-0 pt-4 pb-2 px-4">
+                        <h5 class="fw-bold text-dark d-flex align-items-center gap-2 mb-0">
+                            <div class="bg-primary bg-opacity-10 text-primary rounded-circle d-flex justify-content-center align-items-center" style="width: 40px; height: 40px;">
+                                <i class="bi bi-person-badge"></i>
+                            </div>
+                            Employment Profile
+                        </h5>
+                    </div>
+                    <div class="card-body px-4 pb-4">
+                        <!-- 🌟 UPGRADED NESTED BOXES LAYOUT -->
+                        <div class="d-flex flex-column gap-3">
+                            <div class="bg-light rounded-4 p-3 border border-light-subtle">
+                                <label class="text-muted text-uppercase fw-bold mb-1" style="font-size: 0.75rem; letter-spacing: 1px;">Department</label>
+                                <p class="mb-0 fs-6 fw-semibold text-dark">@Model.InstructorProfile.DepartmentName</p>
+                            </div>
+
+                            <div class="bg-light rounded-4 p-3 border border-light-subtle">
+                                <label class="text-muted text-uppercase fw-bold mb-1" style="font-size: 0.75rem; letter-spacing: 1px;">Email Address</label>
+                                <p class="mb-0 fs-6 fw-semibold text-dark text-break">@Model.InstructorProfile.Email</p>
+                            </div>
+
+                            <div class="bg-light rounded-4 p-3 border border-light-subtle">
+                                <label class="text-muted text-uppercase fw-bold mb-1" style="font-size: 0.75rem; letter-spacing: 1px;">Office Hours</label>
+                                <p class="mb-0 fs-6 fw-bold text-primary d-flex align-items-center gap-2">
+                                    <i class="bi bi-clock-history"></i> @Model.InstructorProfile.OfficeHours
+                                </p>
+                            </div>
+
+                            <div class="row g-3">
+                                <div class="col-6">
+                                    <div class="bg-light rounded-4 p-3 h-100 border border-light-subtle">
+                                        <label class="text-muted text-uppercase fw-bold mb-1" style="font-size: 0.75rem; letter-spacing: 1px;">Start Year</label>
+                                        <p class="mb-0 fs-6 fw-semibold text-dark">@Model.InstructorProfile.Start_year</p>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="bg-light rounded-4 p-3 h-100 border border-light-subtle">
+                                        <label class="text-muted text-uppercase fw-bold mb-1" style="font-size: 0.75rem; letter-spacing: 1px;">Status</label>
+                                        <div>
+                                            <span class="badge bg-success bg-opacity-10 text-success px-3 py-1.5 rounded-pill fw-bold border border-success-subtle shadow-sm d-inline-flex align-items-center gap-1">
+                                                <i class="bi bi-circle-fill" style="font-size: 0.4rem;"></i> @Model.InstructorProfile.StatusDescription
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="bg-light rounded-4 p-3 border border-light-subtle">
+                                <label class="text-muted text-uppercase fw-bold mb-1" style="font-size: 0.75rem; letter-spacing: 1px;">National ID</label>
+                                <p class="mb-0 fs-6 fw-semibold text-dark font-monospace">@Model.InstructorProfile.National_Id</p>
+                            </div>
+                        </div>
+
+                        <!-- 🌟 Upgraded Salary Widget -->
+                        <div class="mt-4 p-3 rounded-4 border border-success-subtle bg-success bg-opacity-10 d-flex justify-content-between align-items-center hover-lift">
+                            <div>
+                                <small class="text-success text-uppercase fw-bold d-block mb-1" style="font-size: 0.7rem; letter-spacing: 1px;">Current Salary</small>
+                                <span class="fw-bolder text-success fs-5">@Model.InstructorProfile.Salary.ToString("C")</span>
+                            </div>
+                            <div class="bg-white text-success shadow-sm rounded-circle d-flex justify-content-center align-items-center" style="width: 48px; height: 48px;">
+                                <i class="bi bi-cash-coin fs-4"></i>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column: Current Teaching Schedule Grid -->
+            <div class="col-lg-8">
+                <div class="card shadow-sm border-0 rounded-4 h-100 bg-white hover-lift-card">
+                    <div class="card-header bg-transparent border-0 pt-4 pb-2 px-4 d-flex justify-content-between align-items-center flex-wrap gap-2">
+                        <h5 class="fw-bold text-dark d-flex align-items-center gap-2 mb-0">
+                            <div class="bg-primary bg-opacity-10 text-primary rounded-circle d-flex justify-content-center align-items-center" style="width: 40px; height: 40px;">
+                                <i class="bi bi-journal-bookmark-fill"></i>
+                            </div>
+                            Active Courses
+                        </h5>
+                        <span class="badge bg-primary bg-opacity-10 text-primary border border-primary-subtle px-3 py-2 rounded-pill fw-bold shadow-sm d-flex align-items-center gap-1">
+                            <i class="bi bi-collection"></i> @(Model.ActiveCourses?.Count ?? 0) Courses Assigned
+                        </span>
+                    </div>
+
+                    <div class="card-body px-4 pb-4">
+                        @if (Model.ActiveCourses == null || !Model.ActiveCourses.Any())
+                        {
+                            <div class="text-center py-5 text-muted bg-light rounded-4 border border-light-subtle p-5">
+                                <i class="bi bi-inbox fs-1 d-block mb-3 text-secondary opacity-50"></i>
+                                <h6 class="fw-bold text-dark fs-5 mb-1">No courses assigned</h6>
+                                <p class="small mb-0 text-muted">You are not scheduled to teach any courses this semester.</p>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="row g-3">
+                                @foreach (var c in Model.ActiveCourses)
+                                {
+                                    <div class="col-md-6">
+                                        <div class="card h-100 border border-light-subtle shadow-xs rounded-4 bg-light bg-opacity-50 hover-shadow transition-all">
+                                            <div class="card-body p-4 d-flex flex-column">
+                                                <div class="d-flex justify-content-between align-items-start mb-3">
+                                                    <span class="badge bg-white text-primary border border-primary-subtle shadow-sm px-3 py-1.5 rounded-pill fw-bold">
+                                                        @c.CourseCode
+                                                    </span>
+                                                    <div class="text-muted small">
+                                                        <span class="badge bg-white text-secondary border shadow-sm">Undergraduate</span>
+                                                    </div>
+                                                </div>
+
+                                                <h5 class="fw-bold text-dark mb-1">@c.CourseName</h5>
+                                                <p class="text-muted small mb-4">Active Semester Instruction</p>
+
+                                                <div class="mt-auto pt-3 border-top border-light-subtle d-flex gap-2">
+                                                    <a asp-page="./CourseRoster" asp-route-courseId="@c.CourseId" class="btn btn-sm bg-white border fw-semibold rounded-pill px-3 py-2 flex-grow-1 text-decoration-none text-center text-dark shadow-sm hover-lift d-flex align-items-center justify-content-center gap-1">
+                                                        <i class="bi bi-people"></i> Roster
+                                                    </a>
+                                                    <a asp-page="./Grades" asp-route-courseId="@c.CourseId" class="btn btn-sm btn-primary fw-semibold rounded-pill px-3 py-2 flex-grow-1 text-decoration-none text-center shadow-sm hover-lift d-flex align-items-center justify-content-center gap-1">
+                                                        <i class="bi bi-pencil-square"></i> Grades
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-warning shadow-sm rounded-4 d-flex align-items-center gap-3 p-4 border-0 bg-white" role="alert">
+            <i class="bi bi-exclamation-triangle-fill fs-2 text-warning"></i>
+            <div>
+                <h6 class="fw-bold mb-1 text-dark">Profile Data Missing</h6>
+                <p class="mb-0 text-muted">We couldn't load your instructor profile details right now. Please try refreshing the page or contact IT support.</p>
+            </div>
+        </div>
+    }
+</div>
+
+<!-- FULL SCHEDULE MODAL POPUP -->
+<div class="modal fade" id="fullScheduleModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+            <div class="modal-header px-4 py-3 border-bottom border-light-subtle bg-light">
+                <h5 class="modal-title fw-bold text-dark d-flex align-items-center gap-2">
+                    <i class="bi bi-calendar3 text-primary"></i> Teaching Schedule — @Model.InstructorProfile?.ActiveSemesterName
+                </h5>
+                <button type="button" class="btn-close shadow-none" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4">
+                <p class="text-muted small mb-4">Here is your complete weekly timetable and course schedule for the active semester.</p>
+
+                <div class="table-responsive border rounded-4 overflow-hidden shadow-sm">
+                    <table class="table table-hover align-middle mb-0 table-borderless">
+                        <thead class="text-uppercase fs-7 text-muted fw-bold bg-light border-bottom">
+                            <tr>
+                                <th class="py-3 ps-4">Course Code</th>
+                                <th class="py-3">Course Name</th>
+                                <th class="py-3">Session Type</th>
+                                <th class="py-3">Day</th>
+                                <th class="py-3 pe-4">Time</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (Model.ActiveCourses != null && Model.ActiveCourses.Any())
+                            {
+                                @foreach (var c in Model.ActiveCourses)
+                                {
+                                    <tr class="border-bottom border-light-subtle transition-hover">
+                                        <td class="ps-4 fw-bold text-primary">@c.CourseCode</td>
+                                        <td class="fw-bold text-dark">@c.CourseName</td>
+                                        <td>
+                                            <span class="badge bg-info bg-opacity-10 text-info border border-info-subtle px-3 py-1.5 rounded-pill shadow-sm">@c.ScheduleType</span>
+                                        </td>
+                                        <td class="fw-semibold text-secondary">@c.ScheduleDay</td>
+                                        <td class="text-muted pe-4">
+                                            <i class="bi bi-clock small me-1"></i> @c.ScheduleTime
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                            else
+                            {
+                                <tr>
+                                    <td colspan="5" class="text-center py-5 text-muted">
+                                        <i class="bi bi-calendar-x fs-2 d-block mb-2 opacity-50"></i>
+                                        No scheduled classes found.
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer px-4 py-3 border-0 bg-white">
+                <button type="button" class="btn btn-secondary px-4 rounded-pill fw-semibold shadow-sm hover-lift" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- EDIT PROFILE MODAL -->
+<div class="modal fade" id="editProfileModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+            <div class="modal-header px-4 py-3 border-bottom border-light-subtle bg-light">
+                <h5 class="modal-title fw-bold text-dark d-flex align-items-center gap-2">
+                    <i class="bi bi-pencil-square text-primary"></i> Update Profile Details
+                </h5>
+                <button type="button" class="btn-close shadow-none" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="post" asp-page-handler="UpdateProfile">
+                <div class="modal-body p-4 p-md-5">
+                    <p class="text-muted small mb-4">Keep your contact details and availability up to date for your students.</p>
+
+                    <input type="hidden" name="InstructorId" value="@Model.InstructorProfile?.Id" />
+
+                    <div class="mb-4">
+                        <label class="form-label text-muted small text-uppercase fw-bold">Email Address</label>
+                        <input type="email" class="form-control bg-light border-light-subtle py-2.5 rounded-3 transition-hover" name="UpdatedEmail" value="@Model.InstructorProfile?.Email" required />
+                    </div>
+
+                    <div class="mb-2">
+                        <label class="form-label text-muted small text-uppercase fw-bold">Office Hours / Location</label>
+                        <input type="text" class="form-control bg-light border-light-subtle py-2.5 rounded-3 transition-hover" name="UpdatedOfficeHours" value="@(Model.InstructorProfile?.OfficeHours == "Not specified yet" ? "" : Model.InstructorProfile?.OfficeHours)" placeholder="e.g., Mon/Wed 2-4 PM in Room 301" required />
+                    </div>
+                </div>
+                <div class="modal-footer px-4 py-3 border-top border-light-subtle bg-white">
+                    <button type="button" class="btn bg-white border px-4 rounded-pill fw-semibold text-secondary transition-hover hover-bg-light" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary px-4 rounded-pill shadow-sm fw-semibold hover-lift">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+    .hover-shadow:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 .75rem 1.5rem rgba(0,0,0,.08) !important;
+    }
+
+    .hover-lift {
+        transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+    }
+
+        .hover-lift:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 .5rem 1rem rgba(0,0,0,.15) !important;
+        }
+
+    .hover-lift-card {
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+        .hover-lift-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 .5rem 1.5rem rgba(0,0,0,.08) !important;
+        }
+
+    .shadow-xs {
+        box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    }
+
+    .transition-hover {
+        transition: all 0.2s ease;
+    }
+
+        .transition-hover:focus {
+            background-color: #fff !important;
+            border-color: #0d6efd !important;
+            box-shadow: 0 0 0 0.25rem rgba(13,110,253,.25) !important;
+        }
+
+    .hover-bg-light:hover {
+        background-color: #f8f9fa;
+    }
+</style>

@@ -1,0 +1,127 @@
+﻿@page
+@model Registration.Web.Pages.Attendance.ViewStudentsModel
+@{
+    ViewData["Title"] = "Attendance Roster";
+}
+
+<div class="container-fluid px-4 py-4" style="background-color: #f4f6f9; min-height: 90vh;">
+    <!-- Modern Header Section -->
+    <div class="row align-items-center mb-4 g-3">
+        <div class="col-xl-8 col-md-7">
+            <div class="d-flex align-items-center gap-3">
+                <div class="bg-primary bg-opacity-10 text-primary p-3 rounded-4 d-flex align-items-center justify-content-center shadow-sm" style="width: 60px; height: 60px;">
+                    <span class="fs-3">🎓</span>
+                </div>
+                <div>
+                    <h2 class="fw-bold text-dark mb-1 tracking-tight">Attendance Roster</h2>
+                    <!-- Context badges without awkward trailing pipes -->
+                    <div class="d-flex align-items-center gap-2 mt-2 flex-wrap">
+                        <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 rounded-pill px-3 py-1.5 fw-semibold">
+                            📚 @Model.CourseName
+                        </span>
+                        <span class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary border-opacity-25 rounded-pill px-3 py-1.5 fw-semibold">
+                            🕒 @Model.ScheduleDetails
+                        </span>
+                        <span class="badge bg-info bg-opacity-10 text-info border border-info border-opacity-25 rounded-pill px-3 py-1.5 fw-semibold">
+                            📅 @Model.SelectedDate.ToString("dd MMM yyyy")
+                        </span>
+                        <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 rounded-pill px-3 py-1.5 fw-semibold">
+                            ✅ Total Attended: @Model.StudentRoster.Count
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-4 col-md-5 text-md-end">
+            <a href="/Attendance/LectureDates?scheduleId=@Model.ScheduleId" class="btn btn-white bg-white border text-secondary shadow-sm px-4 py-2.5 rounded-pill fw-semibold text-decoration-none transition-all">
+                ← Back to Dates
+            </a>
+        </div>
+    </div>
+
+    <!-- Error Alert Banner -->
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show rounded-4 shadow-sm mb-4 border-0 bg-danger bg-opacity-10 text-danger py-3 px-4" role="alert">
+            <div class="d-flex align-items-center">
+                <span class="me-3 fs-4">⚠️</span>
+                <div class="fw-semibold">@TempData["ErrorMessage"]</div>
+            </div>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <!-- Main Card Container -->
+    <div class="card shadow-sm border-0 rounded-4 overflow-hidden bg-white">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover table-striped align-middle mb-0 text-nowrap">
+                    <thead class="bg-light text-uppercase fs-7 text-muted fw-bold border-bottom">
+                        <tr>
+                            <th class="py-3.5 ps-4" style="width: 10%;">#</th>
+                            <th class="py-3.5" style="width: 35%;">Student ID</th>
+                            <th class="py-3.5" style="width: 55%;">Student Name</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model.StudentRoster != null && Model.StudentRoster.Any())
+                        {
+                            int index = 1;
+                            foreach (var student in Model.StudentRoster)
+                            {
+                                <tr>
+                                    <td class="ps-4 fw-bold text-secondary">@index</td>
+                                    <td>
+                                        <span class="badge bg-light text-dark border px-2.5 py-1.5 fw-mono fw-semibold shadow-2xs">
+                                            #@student.Student_Id
+                                        </span>
+                                    </td>
+                                    <td class="fw-bold text-dark py-3">
+                                        <div class="d-flex align-items-center gap-2">
+                                            <div class="rounded-circle bg-primary bg-opacity-10 text-primary d-flex align-items-center justify-content-center fw-bold fs-7" style="width: 32px; height: 32px;">
+                                                @student.StudentName.Substring(0, 1).ToUpper()
+                                            </div>
+                                            <span>@student.StudentName</span>
+                                        </div>
+                                    </td>
+                                </tr>
+                                index++;
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="3" class="text-center py-5 text-muted">
+                                    <div class="py-5">
+                                        <span class="display-6 d-block mb-3">📭</span>
+                                        <h5 class="fw-bold text-dark mb-1">No attendance records found</h5>
+                                        <p class="text-muted mb-0">No students checked in for this lecture date.</p>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .fw-mono {
+        font-family: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    }
+
+    .shadow-2xs {
+        box-shadow: 0 1px 2px 0 rgb(0 0 / 0.05);
+    }
+
+    .transition-all {
+        transition: all 0.2s ease-in-out;
+    }
+
+        .transition-all:hover {
+            transform: translateY(-1px);
+            background-color: #f8f9fa;
+        }
+</style>

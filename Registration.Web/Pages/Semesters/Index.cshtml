@@ -1,0 +1,276 @@
+﻿@page
+@model Registration.Web.Pages.Semesters.IndexModel
+@{
+    ViewData["Title"] = "Academic Semesters";
+}
+
+<div class="container-fluid px-4 py-4" style="background-color: #f8f9fa; min-height: 90vh;">
+    <!-- Modern Header Section -->
+    <div class="row align-items-center mb-4 g-3">
+        <div class="col-xl-6 col-md-5">
+            <div class="d-flex align-items-center gap-3">
+                <div class="bg-primary bg-opacity-10 text-primary p-3 rounded-4 d-flex align-items-center justify-content-center shadow-sm" style="width: 56px; height: 56px;">
+                    <span class="fs-4">📅</span>
+                </div>
+                <div>
+                    <h2 class="fw-bold text-dark mb-1 tracking-tight">Academic Semesters</h2>
+                    <p class="text-muted mb-0 fs-6">Configure academic terms, registration periods, and active cycles.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-6 col-md-7">
+            <div class="d-flex align-items-center justify-content-md-end gap-2 flex-wrap">
+                <button type="button" class="btn btn-primary shadow-sm px-4 py-2 rounded-pill fw-semibold hover-lift" data-bs-toggle="modal" data-bs-target="#addSemesterModal">
+                    + Add Semester
+                </button>
+                <a href="/AdminDashboard" class="btn btn-light border text-secondary shadow-sm px-4 py-2 rounded-pill fw-semibold hover-lift">
+                    ← Dashboard
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Alert Banners -->
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show rounded-4 shadow-sm mb-4 border-0 bg-danger bg-opacity-10 text-danger py-3 px-4">
+            <div class="d-flex align-items-center">
+                <span class="me-3 fs-4">⚠️</span>
+                <div class="fw-semibold">@TempData["ErrorMessage"]</div>
+            </div>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show rounded-4 shadow-sm mb-4 border-0 bg-success bg-opacity-10 text-success py-3 px-4">
+            <div class="d-flex align-items-center">
+                <span class="me-3 fs-4">✅</span>
+                <div class="fw-semibold">@TempData["SuccessMessage"]</div>
+            </div>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <!-- Main Card Container -->
+    <div class="card shadow-sm border-0 rounded-4 overflow-hidden bg-white">
+        <!-- Search Toolbar with Search Button -->
+        <div class="card-header bg-white border-bottom py-4 px-4">
+            <div class="row align-items-center g-3">
+                <div class="col-lg-8 col-md-7">
+                    <div class="input-group input-group-lg bg-light border rounded-pill overflow-hidden shadow-none">
+                        <span class="input-group-text bg-transparent border-0 ps-4 text-muted">🔍</span>
+                        <input type="text" id="searchInput" class="form-control border-0 bg-transparent shadow-none fs-6 ps-2" placeholder="Search by semester name...">
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-5 text-md-end">
+                    <button type="button" class="btn btn-primary btn-lg w-100 rounded-pill fw-semibold shadow-sm px-4" onclick="filterTable()">
+                        Search
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0 text-nowrap" id="semestersTable">
+                    <thead class="bg-light text-uppercase fs-7 text-muted fw-bold">
+                        <tr>
+                            <th class="py-3 ps-4" style="width: 8%;"># ID</th>
+                            <th class="py-3" style="width: 25%;">Semester Name</th>
+                            <th class="py-3" style="width: 20%;">Start Date</th>
+                            <th class="py-3" style="width: 20%;">End Date</th>
+                            <th class="py-3" style="width: 15%;">Registration Status</th>
+                            <th class="py-3 text-end pe-4" style="width: 12%;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model.SemestersList != null && Model.SemestersList.Any())
+                        {
+                            foreach (var semester in Model.SemestersList)
+                            {
+                                <tr>
+                                    <td class="ps-4 fw-bold text-secondary">@semester.Id</td>
+                                    <td class="fw-bold text-dark py-3">@semester.Name</td>
+                                    <td class="text-secondary fw-medium">@(semester.Start_date.HasValue? semester.Start_date.Value.ToString("MMM dd, yyyy") : "N/A")</td>
+                                    <td class="text-secondary fw-medium">@(semester.End_date.HasValue? semester.End_date.Value.ToString("MMM dd, yyyy") : "N/A")</td>
+                                    <td>
+                                        @if (semester.Is_Registration_Open == true)
+                                        {
+                                            <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 px-3 py-2 rounded-pill fw-semibold">
+                                                ● Registration Open
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25 px-3 py-2 rounded-pill fw-semibold">
+                                                ● Closed
+                                            </span>
+                                        }
+                                    </td>
+                                    <td class="text-end pe-4">
+                                        @if (semester.Is_Registration_Open != true)
+                                        {
+                                            <form method="post" asp-page-handler="OpenRegistration" asp-route-id="@semester.Id" class="d-inline">
+                                                <button type="submit" class="btn btn-sm btn-light border text-success fw-semibold rounded-pill px-3 py-1 shadow-sm d-inline-flex align-items-center gap-1 me-1" onclick="return confirm('Open registration for @semester.Name? This will close registration for all other semesters automatically.');">
+                                                    🔓 Open Reg
+                                                </button>
+                                            </form>
+                                        }
+                                        else
+                                        {
+                                            <form method="post" asp-page-handler="CloseRegistration" asp-route-id="@semester.Id" class="d-inline">
+                                                <button type="submit" class="btn btn-sm btn-light border text-secondary fw-semibold rounded-pill px-3 py-1 shadow-sm d-inline-flex align-items-center gap-1 me-1" onclick="return confirm('Are you sure you want to close registration for @semester.Name?');">
+                                                    🔒 Close Reg
+                                                </button>
+                                            </form>
+                                        }
+
+                                        <!-- The Courses Management Button -->
+                                        <a href="/Semesters/Courses?semesterId=@semester.Id" class="btn btn-sm btn-light border text-primary fw-semibold rounded-pill px-3 py-1 shadow-sm d-inline-flex align-items-center gap-1 me-1">
+                                            📚 Courses
+                                        </a>
+
+                                        <button type="button" class="btn btn-sm btn-light border text-primary fw-semibold rounded-pill px-3 py-1 shadow-sm d-inline-flex align-items-center gap-1" onclick="openEditModal(@semester.Id)">
+                                            ✏️ Edit Details
+                                        </button>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="6" class="text-center py-5 text-muted">
+                                    <div class="py-4">
+                                        <span class="fs-1 d-block mb-2">📅</span>
+                                        <p class="mb-0 fw-semibold">No semesters found in the system.</p>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add New Semester Modal -->
+<div class="modal fade" id="addSemesterModal" tabindex="-1" aria-labelledby="addSemesterModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content rounded-4 border-0 shadow-lg">
+            <div class="modal-header border-0 pb-0 px-4 pt-4">
+                <h5 class="modal-title fw-bold text-dark" id="addSemesterModalLabel">Add New Semester</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body px-4 py-3">
+                <form method="post" asp-page-handler="CreateModal">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold text-secondary small text-uppercase">Semester Name</label>
+                        <input type="text" name="NewSemester.Name" class="form-control form-control-lg rounded-3 border-light bg-light" placeholder="e.g. Fall 2026" required />
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold text-secondary small text-uppercase">Start Date</label>
+                            <input type="date" name="NewSemester.Start_date" class="form-control form-control-lg rounded-3 border-light bg-light" required />
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold text-secondary small text-uppercase">End Date</label>
+                            <input type="date" name="NewSemester.End_date" class="form-control form-control-lg rounded-3 border-light bg-light" required />
+                        </div>
+                    </div>
+
+                    <div class="mb-4 form-check form-switch mt-2">
+                        <input class="form-check-input" type="checkbox" id="addIsRegistrationOpen" name="NewSemester.Is_Registration_Open" value="true">
+                        <label class="form-check-label fw-bold text-dark ms-2" for="addIsRegistrationOpen">Allow Student Registrations</label>
+                    </div>
+
+                    <div class="d-flex justify-content-end gap-2 pt-2 border-top">
+                        <button type="button" class="btn btn-light px-4 py-2.5 rounded-pill fw-semibold text-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary px-5 py-2.5 rounded-pill fw-semibold shadow-sm">Create Semester</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Semester Modal -->
+<div class="modal fade" id="editSemesterModal" tabindex="-1" aria-labelledby="editSemesterModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content rounded-4 border-0 shadow-lg">
+            <div class="modal-header border-0 pb-0 px-4 pt-4">
+                <h5 class="modal-title fw-bold text-dark" id="editSemesterModalLabel">Edit Semester Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body px-4 py-3">
+                <form method="post" asp-page-handler="SaveModal">
+                    <input type="hidden" id="editSemesterId" name="Semester.Id" />
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold text-secondary small text-uppercase">Semester Name</label>
+                        <input type="text" id="editName" name="Semester.Name" class="form-control form-control-lg rounded-3 border-light bg-light" required />
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold text-secondary small text-uppercase">Start Date</label>
+                            <input type="date" id="editStartDate" name="Semester.Start_date" class="form-control form-control-lg rounded-3 border-light bg-light" required />
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold text-secondary small text-uppercase">End Date</label>
+                            <input type="date" id="editEndDate" name="Semester.End_date" class="form-control form-control-lg rounded-3 border-light bg-light" required />
+                        </div>
+                    </div>
+
+                    <div class="mb-4 form-check form-switch mt-2">
+                        <input class="form-check-input" type="checkbox" id="editIsRegistrationOpen" name="Semester.Is_Registration_Open" value="true">
+                        <label class="form-check-label fw-bold text-dark ms-2" for="editIsRegistrationOpen">Allow Student Registrations</label>
+                    </div>
+
+                    <div class="d-flex justify-content-end gap-2 pt-2 border-top">
+                        <button type="button" class="btn btn-light px-4 py-2.5 rounded-pill fw-semibold text-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary px-5 py-2.5 rounded-pill fw-semibold shadow-sm">Save Changes</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function filterTable() {
+            let input = document.getElementById("searchInput").value.toLowerCase();
+            let rows = document.querySelectorAll("#semestersTable tbody tr");
+
+            rows.forEach(row => {
+                if (row.cells.length < 6) return;
+                let name = row.cells[1].textContent.toLowerCase();
+                row.style.display = name.includes(input) ? "" : "none";
+            });
+        }
+
+        function openEditModal(semesterId) {
+            fetch(`/Semesters?handler=SemesterJson&id=` + semesterId)
+                .then(response => response.json())
+                .then(semester => {
+                    document.getElementById('editSemesterId').value = semester.id;
+                    document.getElementById('editName').value = semester.name;
+
+                    document.getElementById('editStartDate').value = semester.start_date ? semester.start_date.split('T')[0] : '';
+                    document.getElementById('editEndDate').value = semester.end_date ? semester.end_date.split('T')[0] : '';
+
+                    document.getElementById('editIsRegistrationOpen').checked = semester.is_Registration_Open;
+
+                    var myModal = new bootstrap.Modal(document.getElementById('editSemesterModal'));
+                    myModal.show();
+                })
+                .catch(error => {
+                    alert("Error loading semester details.");
+                });
+        }
+    </script>
+}

@@ -1,0 +1,193 @@
+﻿@page
+@model Registration.Web.Pages.StudentDashboard.GradesModel
+@{
+    ViewData["Title"] = "Academic Grades";
+}
+
+<!-- Bootstrap Icons -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+<div class="container-fluid py-4 px-md-5">
+    @if (Model.StudentProfile != null)
+    {
+        <!-- Page Header -->
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
+            <div>
+                <div class="d-flex align-items-center gap-2 mb-1">
+                    <h2 class="display-6 fw-bolder text-dark mb-0" style="letter-spacing: -1px;">Academic Grades</h2>
+                    <span class="badge bg-primary bg-opacity-10 text-primary border border-primary-subtle px-3 py-1.5 rounded-pill fs-6 fw-semibold shadow-sm">
+                        🗓️ @Model.CurrentSemesterName Semester
+                    </span>
+                </div>
+                <p class="text-muted fs-5 mb-0">Detailed granular grade breakdown for <strong class="text-dark">@Model.StudentProfile.StudentName</strong></p>
+            </div>
+            <div>
+                <a asp-page="./Index" asp-route-studentId="@Model.StudentProfile.Id" class="btn btn-outline-secondary bg-white border shadow-sm rounded-pill px-4 py-2 fw-semibold hover-lift">
+                    <i class="bi bi-arrow-left me-1"></i> Back to Dashboard
+                </a>
+            </div>
+        </div>
+
+        <!-- Quick Stats Row -->
+        <div class="row g-4 mb-4">
+            <!-- Enrolled Courses -->
+            <div class="col-md-3">
+                <div class="card border-0 shadow-sm rounded-4 bg-light bg-gradient p-4 h-100 hover-lift-card border border-light-subtle">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <span class="text-muted small text-uppercase fw-bold" style="letter-spacing: 0.5px;">Enrolled Courses</span>
+                        <i class="bi bi-collection text-secondary opacity-50 fs-4"></i>
+                    </div>
+                    <h2 class="display-5 fw-bolder text-dark mb-0">@(Model.SemesterGrades?.Count ?? 0)</h2>
+                </div>
+            </div>
+            <!-- Total Credits -->
+            <div class="col-md-3">
+                <div class="card border-0 shadow-sm rounded-4 bg-light bg-gradient p-4 h-100 hover-lift-card border border-light-subtle">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <span class="text-muted small text-uppercase fw-bold" style="letter-spacing: 0.5px;">Total Credits</span>
+                        <i class="bi bi-lightning-charge text-primary opacity-50 fs-4"></i>
+                    </div>
+                    <h2 class="display-5 fw-bolder text-primary mb-0">@Model.TotalSemesterCredits</h2>
+                </div>
+            </div>
+            <!-- Semester GPA (Gradient) -->
+            <div class="col-md-3">
+                <div class="card border-0 shadow-sm rounded-4 text-white p-4 h-100 hover-lift-card position-relative overflow-hidden" style="background: linear-gradient(135deg, #20c997 0%, #198754 100%);">
+                    <i class="bi bi-bar-chart position-absolute opacity-25" style="font-size: 6rem; right: -10px; bottom: -15px;"></i>
+                    <div class="position-relative z-1">
+                        <span class="text-white-50 small text-uppercase fw-bold d-block mb-1" style="letter-spacing: 0.5px;">Semester GPA</span>
+                        <h2 class="display-5 fw-bolder text-white mb-0">@Model.CalculateSemesterGpa()</h2>
+                    </div>
+                </div>
+            </div>
+            <!-- Academic Status -->
+            <div class="col-md-3">
+                <div class="card border-0 shadow-sm rounded-4 bg-light bg-gradient p-4 h-100 hover-lift-card border border-light-subtle d-flex flex-column justify-content-center align-items-center text-center">
+                    <span class="text-muted small text-uppercase fw-bold d-block mb-3" style="letter-spacing: 0.5px;">Academic Status</span>
+                    <span class="badge bg-success bg-opacity-10 text-success border border-success-subtle px-4 py-2 fs-5 rounded-pill shadow-sm w-100">
+                        @Model.StudentProfile.Description
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Grades Summary Table -->
+        <div class="card border-0 shadow-sm rounded-4 overflow-hidden hover-lift-card">
+            <div class="card-header bg-white border-bottom py-4 px-4 d-flex align-items-center gap-2">
+                <div class="bg-primary bg-opacity-10 text-primary rounded-circle d-flex justify-content-center align-items-center" style="width: 32px; height: 32px;">
+                    <i class="bi bi-clipboard-data"></i>
+                </div>
+                <h5 class="fw-bold text-dark mb-0">Course Assessment Scores</h5>
+            </div>
+            <div class="card-body p-0">
+                @if (Model.SemesterGrades != null && Model.SemesterGrades.Any())
+                {
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0 table-borderless">
+                            <thead class="text-uppercase" style="font-size: 0.75rem; letter-spacing: 1px;">
+                                <tr class="bg-light border-bottom text-muted fw-bold">
+                                    <th class="py-3 ps-4 rounded-top-start">Course Name</th>
+                                    <th class="py-3 text-center">Midterm <span class="fw-normal opacity-75">(20)</span></th>
+                                    <th class="py-3 text-center">Coursework <span class="fw-normal opacity-75">(40)</span></th>
+                                    <th class="py-3 text-center">Final <span class="fw-normal opacity-75">(40)</span></th>
+                                    <th class="py-3 text-end pe-4 rounded-top-end">Total Grade</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var grade in Model.SemesterGrades)
+                                {
+                                    var midterm = grade.Midterm.HasValue ? grade.Midterm.Value.ToString("0.00") : "-";
+                                    var coursework = grade.Coursework.HasValue ? grade.Coursework.Value.ToString("0.00") : "-";
+                                    var final = grade.Final.HasValue ? grade.Final.Value.ToString("0.00") : "-";
+                                    var total = grade.Total.HasValue ? grade.Total.Value.ToString("0.00") : "-";
+
+                                    var rowClass = "border-bottom border-light-subtle hover-bg-light transition-hover";
+
+                                    <tr class="@rowClass">
+                                        <td class="ps-4 py-4">
+                                            <div class="d-flex align-items-center">
+                                                <div class="bg-white border shadow-sm text-primary rounded-circle d-flex justify-content-center align-items-center me-3" style="width: 44px; height: 44px;">
+                                                    <i class="bi bi-journal-richtext fs-5"></i>
+                                                </div>
+                                                <div>
+                                                    <span class="fs-6 fw-bold text-dark d-block mb-1">@grade.CourseName</span>
+                                                    <span class="badge bg-light text-muted border border-secondary-subtle" style="font-size: 0.7rem;">@Model.CurrentSemesterName - @grade.Status</span>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="text-center">
+                                            <span class="badge @(midterm == "-" ? "bg-light text-muted border border-light-subtle opacity-50" : "bg-white text-dark border shadow-sm") px-3 py-2 fs-6 fw-semibold" style="min-width: 60px;">@midterm</span>
+                                        </td>
+                                        <td class="text-center">
+                                            <span class="badge @(coursework == "-" ? "bg-light text-muted border border-light-subtle opacity-50" : "bg-white text-dark border shadow-sm") px-3 py-2 fs-6 fw-semibold" style="min-width: 60px;">@coursework</span>
+                                        </td>
+                                        <td class="text-center">
+                                            <span class="badge @(final == "-" ? "bg-light text-muted border border-light-subtle opacity-50" : "bg-white text-dark border shadow-sm") px-3 py-2 fs-6 fw-semibold" style="min-width: 60px;">@final</span>
+                                        </td>
+                                        <td class="text-end pe-4">
+                                            @if (total == "-")
+                                            {
+                                                <span class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary-subtle px-4 py-2 fs-6 rounded-pill fw-bold">
+                                                    Not Graded
+                                                </span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-success bg-gradient text-white px-4 py-2 fs-6 rounded-pill fw-bold shadow-sm" style="min-width: 100px;">
+                                                    @total / 100
+                                                </span>
+                                            }
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+                else
+                {
+                    <div class="text-center text-muted py-5">
+                        <i class="bi bi-inbox fs-1 d-block mb-2 text-secondary opacity-50"></i>
+                        <p class="mb-0 fs-5 fw-medium">No course grades registered for this student yet.</p>
+                        <p class="text-muted small">Grades will appear here once instructors submit semester evaluations.</p>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-danger shadow-sm rounded-4 px-4 py-3 border-0 border-start border-5 border-danger" role="alert">
+            <h5 class="alert-heading fw-bold mb-1"><i class="bi bi-exclamation-triangle me-2"></i>Error Loading Grades</h5>
+            <p class="mb-0">Unable to retrieve grades for the requested student profile.</p>
+        </div>
+    }
+</div>
+
+<style>
+    .hover-lift {
+        transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+    }
+
+        .hover-lift:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 .5rem 1rem rgba(0,0,0,.15) !important;
+        }
+
+    .hover-lift-card {
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+        .hover-lift-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 .5rem 1.5rem rgba(0,0,0,.08) !important;
+        }
+
+    .hover-bg-light:hover {
+        background-color: #f8f9fa;
+    }
+
+    .transition-hover {
+        transition: background-color 0.2s ease;
+    }
+</style>

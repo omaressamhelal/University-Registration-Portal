@@ -1,0 +1,122 @@
+﻿@page
+@model Registration.Web.Pages.Attendance.LectureDatesModel
+@{
+    ViewData["Title"] = "Recorded Lecture Dates";
+}
+
+<div class="container-fluid px-4 py-4" style="background-color: #f8f9fa; min-height: 90vh;">
+    <!-- Modern Header Section -->
+    <div class="row align-items-center mb-4 g-3">
+
+        <!-- LEFT SIDE: Title, Icon, and Course Info -->
+        <div class="col-xl-8 col-md-7">
+            <div class="d-flex align-items-center gap-3">
+                <div class="bg-primary bg-opacity-10 text-primary p-3 rounded-4 d-flex align-items-center justify-content-center shadow-sm" style="width: 56px; height: 56px;">
+                    <span class="fs-4">📅</span>
+                </div>
+                <div>
+                    <h2 class="fw-bold text-dark mb-1 tracking-tight">Recorded Lecture Dates</h2>
+                    <div class="d-flex align-items-center gap-2 mt-1 flex-wrap">
+                        <span class="text-muted fs-6">Viewing attendance for: <strong class="text-primary">@Model.CourseName</strong></span>
+                        <span class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary border-opacity-25 rounded-pill px-3 py-1 fw-semibold">
+                            @Model.ScheduleType
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- RIGHT SIDE: Back Button -->
+        <div class="col-xl-4 col-md-5">
+            <div class="d-flex align-items-center justify-content-md-end gap-2 flex-wrap">
+                <a href="/CourseSchedules" class="btn btn-light border text-secondary shadow-sm px-4 py-2 rounded-pill fw-semibold hover-lift">
+                    ← Back to Schedules
+                </a>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Error Alert Banner -->
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show rounded-4 shadow-sm mb-4 border-0 bg-danger bg-opacity-10 text-danger py-3 px-4" role="alert">
+            <div class="d-flex align-items-center">
+                <span class="me-3 fs-4">⚠️</span>
+                <div class="fw-semibold">@TempData["ErrorMessage"]</div>
+            </div>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <!-- Main Card Container -->
+    <div class="card shadow-sm border-0 rounded-4 overflow-hidden bg-white">
+        <!-- Table View -->
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0 text-nowrap">
+                    <thead class="bg-light text-uppercase fs-7 text-muted fw-bold">
+                        <tr>
+                            <th class="py-3 ps-4" style="width: 15%;"># ID</th>
+                            <th class="py-3" style="width: 30%;">Date</th>
+                            <th class="py-3" style="width: 35%;">Students Attended</th>
+                            <th class="py-3 text-end pe-4" style="width: 20%;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model.DatesList != null && Model.DatesList.Any())
+                        {
+                            int index = 1;
+                            foreach (var dateRecord in Model.DatesList)
+                            {
+                                int percentage = Model.TotalEnrolled > 0
+                                ? (dateRecord.StudentsAttended * 100) / Model.TotalEnrolled
+                                : 0;
+
+                                string rateColor = percentage >= 75 ? "bg-success" : (percentage >= 50 ? "bg-warning" : "bg-danger");
+
+                                <tr>
+                                    <td class="ps-4 fw-bold text-secondary">@index</td>
+                                    <td class="fw-bold text-dark py-3">
+                                        <span class="d-flex align-items-center gap-2">
+                                            🗓️ @dateRecord.AttendanceDate.ToString("dd MMM yyyy")
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <div class="d-flex align-items-center gap-3">
+                                            <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 px-3 py-2 rounded-pill fw-semibold">
+                                                👥 @dateRecord.StudentsAttended / @Model.TotalEnrolled
+                                            </span>
+                                            <div class="progress flex-grow-1" style="height: 6px; max-width: 140px;">
+                                                <div class="progress-bar @rateColor" role="progressbar" style="width: @percentage%;"></div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="text-end pe-4">
+                                        <!-- 🌟 Fixed to use @Model.CurrentScheduleId instead of row-level ID -->
+                                        <a href="/Attendance/ViewStudents?scheduleId=@Model.CurrentScheduleId&date=@dateRecord.AttendanceDate.ToString("yyyy-MM-dd")"
+                                           class="btn btn-sm btn-light border text-primary fw-semibold rounded-pill px-4 py-2 shadow-sm hover-primary d-inline-flex align-items-center gap-1">
+                                            👁️ View Students
+                                        </a>
+                                    </td>
+                                </tr>
+                                index++;
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="4" class="text-center py-5 text-muted">
+                                    <div class="py-4">
+                                        <span class="fs-1 d-block mb-2">📂</span>
+                                        <p class="mb-0 fw-semibold">No attendance recorded for this schedule yet.</p>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,167 @@
+﻿@page
+@model Registration.Web.Pages.StudentDashboard.RegisterCoursesModel
+@{
+    ViewData["Title"] = "Course Registration";
+}
+
+<!-- Bootstrap Icons stylesheet -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+<div class="container-fluid py-4 px-md-5">
+    <!-- Header Section -->
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
+        <div>
+            <div class="d-flex align-items-center gap-2 mb-1">
+                <h2 class="display-6 fw-bold text-dark mb-0">Course Registration</h2>
+                <span class="badge bg-primary bg-opacity-10 text-primary border border-primary-subtle px-3 py-1.5 rounded-pill fs-6 fw-semibold shadow-xs">
+                    🗓️ @Model.CurrentSemesterName
+                </span>
+                @if (!Model.IsRegistrationOpen)
+                {
+                    <span class="badge bg-danger bg-opacity-10 text-danger border border-danger-subtle px-3 py-1.5 rounded-pill fs-6 fw-semibold shadow-xs">
+                        🔒 Registration Closed
+                    </span>
+                }
+            </div>
+            <p class="text-muted fs-6 mb-0">Select and register for available courses for your active semester.</p>
+        </div>
+        <div>
+            <a asp-page="./Index" asp-route-studentId="@Model.StudentId" class="btn btn-outline-secondary border shadow-sm rounded-pill px-4 py-2 fw-semibold hover-lift">
+                <i class="bi bi-arrow-left me-1"></i> Back to Dashboard
+            </a>
+        </div>
+    </div>
+
+    <!-- Success / Error Alert Banners -->
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show rounded-4 shadow-sm mb-4 border-0 bg-success bg-opacity-10 text-success py-3 px-4" role="alert">
+            <div class="d-flex align-items-center">
+                <span class="me-3 fs-4">✨</span>
+                <div class="fw-semibold">@TempData["SuccessMessage"]</div>
+            </div>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show rounded-4 shadow-sm mb-4 border-0 bg-danger bg-opacity-10 text-danger py-3 px-4" role="alert">
+            <div class="d-flex align-items-center">
+                <span class="me-3 fs-4">⚠️</span>
+                <div class="fw-semibold">@TempData["ErrorMessage"]</div>
+            </div>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <!-- Available Courses Card Table -->
+    <div class="card border-0 shadow-sm rounded-4 overflow-hidden bg-white">
+        <div class="card-header bg-white border-bottom py-4 px-4 d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <div>
+                <h5 class="fw-bold text-dark mb-1">Available Curriculum Catalog</h5>
+                <p class="text-muted small mb-0">Courses matching your major and foundational requirements.</p>
+            </div>
+            <span class="badge bg-primary bg-opacity-10 text-primary border border-primary-subtle px-3 py-2 fw-semibold rounded-pill">
+                📚 Total Courses: @(Model.AvailableCourses?.Count ?? 0)
+            </span>
+        </div>
+        <div class="card-body p-0">
+            @if (Model.AvailableCourses != null && Model.AvailableCourses.Any())
+            {
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="text-uppercase text-muted fw-bold bg-light" style="font-size: 0.75rem; letter-spacing: 0.5px;">
+                            <tr>
+                                <th class="py-3.5 ps-4">Course Code</th>
+                                <th class="py-3.5">Course Name</th>
+                                <th class="py-3.5">Department</th>
+                                <th class="py-3.5 text-center">Credit Hours</th>
+                                <th class="py-3.5 text-end pe-4">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var course in Model.AvailableCourses)
+                            {
+                                bool isEnrolled = Model.EnrolledCourseIds.Contains(course.Id);
+                                bool isFreshman = string.Equals(course.DepartmentName, "Freshman", StringComparison.OrdinalIgnoreCase);
+
+                                <tr class="transition-row">
+                                    <td class="ps-4 py-3">
+                                        <span class="fw-bold text-primary bg-primary bg-opacity-10 px-2.5 py-1 rounded-2 border border-primary-subtle" style="font-size: 0.85rem;">
+                                            @course.Code
+                                        </span>
+                                    </td>
+                                    <td class="fw-bold text-dark">@course.Name</td>
+                                    <td>
+                                        @if (isFreshman)
+                                        {
+                                            <span class="badge bg-warning bg-opacity-10 text-dark border border-warning-subtle px-3 py-1.5 rounded-pill fw-semibold">
+                                                ⭐ Freshman
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary-subtle px-3 py-1.5 rounded-pill fw-medium">
+                                                🏛️ @course.DepartmentName
+                                            </span>
+                                        }
+                                    </td>
+                                    <td class="text-center">
+                                        <span class="badge bg-light text-dark border px-3 py-1.5 rounded-pill fw-semibold" style="font-size: 0.8rem;">
+                                            ⚡ @(course.CreditHours > 0 ? course.CreditHours : 3) Credits
+                                        </span>
+                                    </td>
+                                    <td class="text-end pe-4">
+                                        @if (isEnrolled)
+                                        {
+                                            <span class="badge bg-success bg-opacity-10 text-success border border-success-subtle px-3 py-2 rounded-pill fw-semibold shadow-xs">
+                                                <i class="bi bi-check-circle-fill me-1"></i> Enrolled
+                                            </span>
+                                        }
+                                        else if (Model.IsRegistrationOpen)
+                                        {
+                                            <form method="post" asp-page-handler="Enroll" asp-route-studentId="@Model.StudentId" asp-route-courseId="@course.Id" class="d-inline m-0">
+                                                <button type="submit" class="btn btn-sm btn-primary rounded-pill px-4 py-2 fw-bold shadow-sm hover-lift">
+                                                    <i class="bi bi-plus-lg me-1"></i> Register
+                                                </button>
+                                            </form>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-secondary bg-opacity-10 text-secondary border px-3 py-2 rounded-pill fw-semibold">
+                                                🔒 Closed
+                                            </span>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <div class="text-center text-muted py-5">
+                    <span class="display-5 d-block mb-3">📂</span>
+                    <h6 class="fw-bold text-dark">No courses found</h6>
+                    <p class="mb-0 small text-muted">There are no available courses matching your enrollment criteria.</p>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<style>
+    .hover-lift {
+        transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+    }
+
+        .hover-lift:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 .5rem 1rem rgba(0,0,0,.08) !important;
+        }
+
+    .transition-row {
+        transition: background-color 0.15s ease-in-out;
+    }
+</style>

@@ -1,0 +1,142 @@
+﻿@page "{id:int}"
+@model Registration.Web.Pages.Admins.DetailsModel
+@{
+    ViewData["Title"] = "Administrator Profile";
+    string initials = !string.IsNullOrEmpty(Model.AdminProfile.Name)
+        ? string.Concat(Model.AdminProfile.Name.Split(' ').Select(n => n[0]))
+        : "A";
+}
+
+<div class="container-fluid px-4 py-4" style="background-color: #f8f9fa; min-height: 90vh;">
+    <!-- Modern Header Section -->
+    <div class="row align-items-center mb-4 g-3">
+        <div class="col-xl-6 col-md-8">
+            <div class="d-flex align-items-center gap-3">
+                <div class="bg-primary bg-opacity-10 text-primary p-3 rounded-4 d-flex align-items-center justify-content-center shadow-sm" style="width: 56px; height: 56px;">
+                    <span class="fs-4">🛡️</span>
+                </div>
+                <div>
+                    <h2 class="fw-bold text-dark mb-1 tracking-tight">Administrator Profile</h2>
+                    <p class="text-muted mb-0 fs-6">Detailed employment records and system privileges.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-6 col-md-4 text-md-end">
+            <a href="/Admins" class="btn btn-light border text-secondary shadow-sm px-4 py-2 rounded-pill fw-semibold hover-lift">
+                ← Back to Directory
+            </a>
+        </div>
+    </div>
+
+    <!-- Alert Banners -->
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show rounded-4 shadow-sm mb-4 border-0 bg-danger bg-opacity-10 text-danger py-3 px-4">
+            <div class="d-flex align-items-center">
+                <span class="me-3 fs-4">⚠️</span>
+                <div class="fw-semibold">@TempData["ErrorMessage"]</div>
+            </div>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show rounded-4 shadow-sm mb-4 border-0 bg-success bg-opacity-10 text-success py-3 px-4">
+            <div class="d-flex align-items-center">
+                <span class="me-3 fs-4">✅</span>
+                <div class="fw-semibold">@TempData["SuccessMessage"]</div>
+            </div>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <!-- Split Profile Layout -->
+    <div class="row g-4">
+        <!-- Left Column: Profile Card -->
+        <div class="col-lg-5">
+            <div class="card border-0 shadow-sm rounded-4 p-4 bg-white text-center h-100">
+                <div class="card-body">
+                    <!-- Avatar Initials Circle -->
+                    <div class="mx-auto bg-primary text-white rounded-circle d-flex align-items-center justify-content-center fw-bold fs-1 shadow-sm mb-4" style="width: 100px; height: 100px;">
+                        @initials
+                    </div>
+
+                    <h3 class="fw-bold text-dark mb-1">@Model.AdminProfile.Name</h3>
+                    <p class="text-muted mb-4">@Model.AdminProfile.Email</p>
+
+                    <hr class="text-muted opacity-25 my-4">
+
+                    <!-- Metadata List -->
+                    <div class="text-start px-2">
+                        <div class="d-flex justify-content-between mb-3">
+                            <span class="text-muted fw-medium">National ID:</span>
+                            <span class="fw-bold text-dark">@(string.IsNullOrEmpty(Model.AdminProfile.National_id) ? "N/A" : Model.AdminProfile.National_id)</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-3">
+                            <span class="text-muted fw-medium">Role Privilege:</span>
+                            <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 px-3 py-1 rounded-pill fw-semibold">
+                                @Model.AdminProfile.Role
+                            </span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-3">
+                            <span class="text-muted fw-medium">Start Year:</span>
+                            <span class="fw-bold text-dark">@Model.AdminProfile.Start_year</span>
+                        </div>
+
+                        <!-- Salary Field with Masking Protection -->
+                        <div class="d-flex justify-content-between mb-3">
+                            <span class="text-muted fw-medium">Salary:</span>
+                            @if (!string.IsNullOrEmpty(Model.AdminProfile.Email) && Model.AdminProfile.Email.Equals(User.Identity?.Name, StringComparison.OrdinalIgnoreCase))
+                            {
+                                <span class="fw-bold text-success">$@Model.AdminProfile.Salary.ToString("N2")</span>
+                            }
+                            else
+                            {
+                                <span class="text-muted fst-italic small">🔒 Confidential</span>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column: Status Management & Overview -->
+        <div class="col-lg-7">
+            <div class="d-flex flex-column gap-4 h-100">
+                <!-- Info Summary Card -->
+                <div class="card border-0 shadow-sm rounded-4 p-4 bg-white">
+                    <div class="card-body">
+                        <h5 class="fw-bold text-dark mb-3">📌 Administrative Overview</h5>
+                        <p class="text-muted mb-0">
+                            This profile record controls system-wide administrative rights. Role privileges determine access boundaries across academic terms, student admissions, and curriculum management catalogs.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Account Status Management Box -->
+                <div class="card border-0 shadow-sm rounded-4 p-4 bg-white">
+                    <div class="card-body">
+                        <h5 class="fw-bold text-dark mb-3">🛡️ Account Status Management</h5>
+                        <form method="post" asp-page-handler="UpdateStatus" class="row g-3 align-items-center">
+                            <div class="col-md-8">
+                                <select name="NewStatusId" class="form-select form-select-lg rounded-3 border-light bg-light">
+                                    @foreach (var status in Model.AllStatusesList)
+                                    {
+                                        <option value="@status.Id" selected="@(status.Id == Model.AdminProfile.Status_id)">
+                                            @status.Description
+                                        </option>
+                                    }
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <button type="submit" class="btn btn-primary btn-lg w-100 rounded-pill fw-semibold shadow-sm">
+                                    Update Status
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

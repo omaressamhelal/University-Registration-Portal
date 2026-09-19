@@ -1,0 +1,213 @@
+﻿@page
+@model Registration.Web.Pages.CourseSchedules.IndexModel
+@{
+    ViewData["Title"] = "Course Schedules";
+}
+
+<div class="container-fluid px-4 py-4" style="background-color: #f8f9fa; min-height: 90vh;">
+    <!-- Modern Header Section -->
+    <div class="row align-items-center mb-4 g-3">
+        <div class="col-xl-6 col-md-5">
+            <div class="d-flex align-items-center gap-3">
+                <div class="bg-primary bg-opacity-10 text-primary p-3 rounded-4 d-flex align-items-center justify-content-center shadow-sm" style="width: 56px; height: 56px;">
+                    <span class="fs-4">🗓️</span>
+                </div>
+                <div>
+                    <h2 class="fw-bold text-dark mb-1 tracking-tight">Course Schedule Management</h2>
+                    <p class="text-muted mb-0 fs-6">Manage times, locations, and instructors for all courses.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-6 col-md-7">
+            <div class="d-flex align-items-center justify-content-md-end gap-2 flex-wrap">
+                <!-- Add Schedule Button Triggering Modal -->
+                <button type="button" class="btn btn-primary shadow-sm px-4 py-2 rounded-pill fw-semibold hover-lift d-inline-flex align-items-center gap-1" data-bs-toggle="modal" data-bs-target="#createScheduleModal">
+                    ➕ Add Schedule
+                </button>
+                <a asp-page="/Courses/Index" class="btn btn-white bg-white text-dark border shadow-sm px-4 py-2 rounded-pill fw-semibold hover-lift">
+                    📖 Curriculum Courses
+                </a>
+                <a asp-page="/AdminDashboard/Index" class="btn btn-light border text-secondary shadow-sm px-4 py-2 rounded-pill fw-semibold hover-lift">
+                    ← Dashboard
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Success/Error Banners -->
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show rounded-4 shadow-sm mb-4 border-0 bg-success bg-opacity-10 text-success py-3 px-4" role="alert">
+            <div class="fw-semibold">@TempData["SuccessMessage"]</div>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <!-- Main Card Container -->
+    <div class="card shadow-sm border-0 rounded-4 overflow-hidden bg-white">
+
+        <!-- Card Header Toolbar -->
+        <div class="card-header bg-white border-bottom py-4 px-4">
+            <form method="get" class="row align-items-center g-3 m-0">
+                <div class="col-lg-5 col-md-12">
+                    <div class="input-group input-group-lg bg-light border rounded-pill overflow-hidden shadow-none">
+                        <span class="input-group-text bg-transparent border-0 ps-4 text-muted">🔍</span>
+                        <input type="text" id="CourseName" name="CourseName" value="@Model.CourseName" class="form-control border-0 bg-transparent shadow-none fs-6 ps-2" placeholder="Filter by Course Name..." />
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-8">
+                    <!-- 🌟 Instant auto-submit on change without needing a button click -->
+                    <select id="SemesterName" name="SemesterName" class="form-select form-select-lg bg-light border rounded-pill px-4 fs-6 shadow-none" asp-for="SemesterName" asp-items="Model.SemesterOptions" onchange="this.form.submit()">
+                        <option value="">-- All Semesters --</option>
+                    </select>
+                </div>
+                <div class="col-lg-3 col-md-4 d-flex gap-2">
+                    <button type="submit" class="btn btn-primary rounded-pill px-4 py-2 shadow-sm fw-semibold flex-grow-1">Search</button>
+                    <a href="/CourseSchedules" class="btn btn-light border text-secondary rounded-pill px-3 py-2 shadow-sm fw-semibold">Reset</a>
+                </div>
+            </form>
+        </div>
+
+        <!-- Table View -->
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <!-- 🌟 Explicit column widths to ensure Actions column is fully visible and never cut off -->
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="bg-light text-uppercase fs-7 text-muted fw-bold">
+                        <tr>
+                            <th class="py-3 ps-4" style="width: 8%;"># ID</th>
+                            <th class="py-3" style="width: 25%;">Course</th>
+                            <th class="py-3" style="width: 18%;">Instructor</th>
+                            <th class="py-3" style="width: 12%;">Semester</th>
+                            <th class="py-3" style="width: 10%;">Day</th>
+                            <th class="py-3 text-center" style="width: 10%;">Type</th>
+                            <th class="py-3" style="width: 17%;">Time</th>
+                            <th class="py-3 text-end pe-4" style="width: 10%;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model.SchedulesList != null && Model.SchedulesList.Any())
+                        {
+                            foreach (var r in Model.SchedulesList)
+                            {
+                                <tr>
+                                    <td class="ps-4 fw-bold text-secondary">@r.ScheduleId</td>
+                                    <td>
+                                        <div class="text-wrap">
+                                            <span class="fw-bold text-dark">@r.CourseCode</span>
+                                            <span class="text-muted ms-1">- @r.CourseName</span>
+                                        </div>
+                                    </td>
+                                    <td class="fw-semibold text-dark text-nowrap">@r.InstructorName</td>
+                                    <td>
+                                        <span class="badge bg-light text-secondary border px-3 py-2 rounded-pill fw-semibold text-nowrap">
+                                            @r.SemesterName
+                                        </span>
+                                    </td>
+                                    <td class="fw-medium text-nowrap">@r.Day</td>
+                                    <td class="text-center">
+                                        @{
+                                            var typeTheme = r.Type switch
+                                            {
+                                                "Lecture" => "bg-primary text-primary border-primary",
+                                                "Section" => "bg-info text-info border-info",
+                                                "Lab" => "bg-warning text-warning border-warning",
+                                                _ => "bg-secondary text-secondary border-secondary"
+                                            };
+                                        }
+                                        <span class="badge @typeTheme bg-opacity-10 border border-opacity-25 px-3 py-2 rounded-pill fw-semibold text-nowrap">
+                                            @r.Type
+                                        </span>
+                                    </td>
+                                    <td class="text-muted fw-medium text-nowrap">
+                                        <span class="d-flex align-items-center gap-1">
+                                            🕒 @r.StartTime - @r.EndTime
+                                        </span>
+                                    </td>
+                                    <td class="text-end pe-4 text-nowrap">
+                                        <a asp-page="/Attendance/LectureDates" asp-route-scheduleId="@r.ScheduleId"
+                                           class="btn btn-sm btn-light border text-primary fw-semibold rounded-pill px-3 py-1.5 shadow-sm hover-primary d-inline-flex align-items-center gap-1">
+                                            📅 Attendance
+                                        </a>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="8" class="text-center py-5 text-muted">
+                                    <div class="py-4">
+                                        <span class="fs-1 d-block mb-2">📂</span>
+                                        <p class="mb-0 fw-semibold">No schedules found matching criteria.</p>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Create Schedule Modal Pop-up -->
+<div class="modal fade" id="createScheduleModal" tabindex="-1" aria-labelledby="createScheduleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content border-0 rounded-4 shadow-lg overflow-hidden">
+            <div class="modal-header bg-white border-bottom px-4 py-3">
+                <h5 class="modal-title fw-bold text-dark" id="createScheduleModalLabel">Register New Course Schedule</h5>
+                <button type="button" class="btn-close shadow-none" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="post" asp-page-handler="Create">
+                <input type="hidden" name="SemesterName" value="@Model.SemesterName" />
+                <input type="hidden" name="CourseName" value="@Model.CourseName" />
+
+                <div class="modal-body p-4 bg-light">
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <label class="form-label fw-semibold text-muted fs-7">COURSE & INSTRUCTOR (@Model.SemesterName)</label>
+                            <select asp-for="NewInstructorsCoursesId" asp-items="Model.InstructorCourseOptions" class="form-select form-select-lg bg-white border rounded-3 fs-6 shadow-none" required>
+                                <option value="">-- Select Course / Instructor Assignment --</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold text-muted fs-7">DAY OF WEEK</label>
+                            <select asp-for="NewDay" class="form-select form-select-lg bg-white border rounded-3 fs-6 shadow-none" required>
+                                <option value="">-- Select Day --</option>
+                                <option value="Saturday">Saturday</option>
+                                <option value="Sunday">Sunday</option>
+                                <option value="Monday">Monday</option>
+                                <option value="Tuesday">Tuesday</option>
+                                <option value="Wednesday">Wednesday</option>
+                                <option value="Thursday">Thursday</option>
+                                <option value="Friday">Friday</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold text-muted fs-7">SESSION TYPE</label>
+                            <select asp-for="NewType" class="form-select form-select-lg bg-white border rounded-3 fs-6 shadow-none" required>
+                                <option value="">-- Select Type --</option>
+                                <option value="Lecture">Lecture</option>
+                                <option value="Section">Section</option>
+                                <option value="Lab">Lab</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold text-muted fs-7">START TIME</label>
+                            <input type="time" asp-for="NewStartTime" class="form-control form-control-lg bg-white border rounded-3 fs-6 shadow-none" required />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold text-muted fs-7">END TIME</label>
+                            <input type="time" asp-for="NewEndTime" class="form-control form-control-lg bg-white border rounded-3 fs-6 shadow-none" required />
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer bg-white border-top px-4 py-3">
+                    <button type="button" class="btn btn-light border text-secondary rounded-pill px-4 py-2 fw-semibold" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary rounded-pill px-4 py-2 fw-semibold shadow-sm">Complete Registration</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

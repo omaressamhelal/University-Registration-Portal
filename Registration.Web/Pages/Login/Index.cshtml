@@ -1,0 +1,147 @@
+﻿@page
+@model Registration.Web.Pages.Login.IndexModel
+@{
+    ViewData["Title"] = "Sign In";
+    Layout = null; // Keeps it isolated without the main layout navigation
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - UniPortal</title>
+    <!-- Bootstrap 5 CSS -->
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <!-- Google Fonts: Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #0b0f19; /* Matches the Admin Dashboard dark background */
+            background: radial-gradient(circle at 50% 0%, #161e2e 0%, #0b0f19 100%);
+            min-height: 100vh;
+            color: #f9fafb;
+        }
+
+        .auth-card {
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 1.5rem 3rem rgba(0, 0, 0, 0.5);
+            border-radius: 1.5rem;
+            background: #111827; /* Deep sleek dark card background */
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+            .auth-card:hover {
+                transform: translateY(-3px);
+                box-shadow: 0 2rem 4rem rgba(0, 0, 0, 0.6);
+            }
+
+        .input-group-custom {
+            background-color: #1f2937 !important;
+            border: 1px solid #374151;
+            border-radius: 0.75rem;
+            transition: all 0.2s ease;
+        }
+
+            .input-group-custom:focus-within {
+                background-color: #111827 !important;
+                border-color: #0d6efd;
+                box-shadow: 0 0 0 4px rgba(13, 110, 253, 0.2);
+            }
+
+        .form-control {
+            color: #f9fafb !important;
+        }
+
+            .form-control::placeholder {
+                color: #6b7280 !important;
+            }
+
+            .form-control:focus {
+                box-shadow: none;
+                background-color: transparent !important;
+                color: #f9fafb !important;
+            }
+
+        .btn-primary-gradient {
+            background: linear-gradient(135deg, #0d6efd 0%, #0dcaf0 100%);
+            border: none;
+            transition: all 0.2s ease;
+        }
+
+            .btn-primary-gradient:hover {
+                filter: brightness(1.1);
+                transform: translateY(-1px);
+                box-shadow: 0 0.5rem 1.5rem rgba(13, 110, 253, 0.4);
+            }
+    </style>
+</head>
+<body class="d-flex align-items-center justify-content-center py-4">
+
+    <div class="container">
+        <div class="row justify-content-center align-items-center">
+            <div class="col-md-8 col-lg-6 col-xl-5">
+
+                <!-- Brand Logo & Header -->
+                <div class="text-center mb-4">
+                    <div class="d-inline-flex align-items-center justify-content-center bg-primary bg-opacity-20 text-primary rounded-circle shadow-sm mb-2 border border-primary border-opacity-25" style="width: 64px; height: 64px;">
+                        <i class="bi bi-mortarboard-fill fs-2"></i>
+                    </div>
+                    <h3 class="fw-bold text-white mb-0" style="letter-spacing: -0.5px;">UniPortal</h3>
+                </div>
+
+                <!-- Main Dark Card -->
+                <div class="auth-card p-4 p-md-5">
+                    <div class="text-center mb-4">
+                        <h4 class="fw-bold text-white mb-1" style="font-size: 1.65rem;">Welcome Back</h4>
+                        <p class="text-secondary small mb-0">Please sign in to access your portal account</p>
+                    </div>
+
+                    <!-- Login Form -->
+                    <form method="post">
+                        <!-- Validation Summary -->
+                        <div asp-validation-summary="ModelOnly" class="text-danger mb-4 fw-semibold text-center alert alert-danger p-3 rounded-3 border-0 bg-danger bg-opacity-25 text-white" style="display: @(ModelState.IsValid ? "none" : "block")"></div>
+
+                        <!-- Email Field -->
+                        <div class="mb-3">
+                            <label asp-for="Email" class="form-label text-uppercase text-secondary fw-bold" style="font-size: 0.7rem; letter-spacing: 0.5px;">Email Address</label>
+                            <div class="input-group input-group-custom overflow-hidden py-1 px-2">
+                                <span class="input-group-text bg-transparent border-0 text-secondary ps-2"><i class="bi bi-envelope fs-5"></i></span>
+                                <input asp-for="Email" class="form-control border-0 bg-transparent shadow-none py-2" placeholder="name@univ.edu" required autofocus />
+                            </div>
+                            <span asp-validation-for="Email" class="text-danger small mt-1 d-block"></span>
+                        </div>
+
+                        <!-- Password Field -->
+                        <div class="mb-4">
+                            <label asp-for="Password" class="form-label text-uppercase text-secondary fw-bold" style="font-size: 0.7rem; letter-spacing: 0.5px;">Password</label>
+                            <div class="input-group input-group-custom overflow-hidden py-1 px-2">
+                                <span class="input-group-text bg-transparent border-0 text-secondary ps-2"><i class="bi bi-lock fs-5"></i></span>
+                                <input asp-for="Password" type="password" class="form-control border-0 bg-transparent shadow-none py-2" placeholder="••••••••" required />
+                            </div>
+                            <span asp-validation-for="Password" class="text-danger small mt-1 d-block"></span>
+                        </div>
+
+                        <!-- Submit Button -->
+                        <div class="d-grid mt-4">
+                            <button type="submit" class="btn btn-primary-gradient btn-lg rounded-pill fw-bold py-3 text-white shadow-sm d-flex align-items-center justify-content-center gap-2">
+                                Sign In <i class="bi bi-arrow-right"></i>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Footer Copyright -->
+                <div class="text-center mt-4 text-secondary small">
+                    &copy; 2026 UniPortal &bull; Secure Academic System
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

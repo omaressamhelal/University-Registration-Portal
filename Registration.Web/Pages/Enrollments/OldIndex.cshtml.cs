@@ -39,14 +39,23 @@ namespace Registration.Web.Pages.Enrollments
             SemestersList = await _httpClient.GetFromJsonAsync<List<Semester>>("https://127.0.0.1:7126/api/semesters") ?? new();
             await LoadStatusesAsync();
 
-            // Robust Default Logic: Open registration first, fallback to the newest semester if all are closed
+            // Robust Default Logic: Open registration first, fallback to today's date, then newest semester
             if (!Request.Query.ContainsKey("SemesterFilter"))
             {
+                // 1. Priority: Semester where registration is explicitly open
                 var targetSemester = SemestersList.FirstOrDefault(s => s.Is_Registration_Open == true);
 
                 if (targetSemester == null)
                 {
-                    targetSemester = SemestersList.OrderByDescending(s => s.Start_date).FirstOrDefault(); // Fallback to the newest semester (ordered by date DESC)
+                    // 2. Date Logic Fallback: The semester that is currently active today
+                    var today = DateTime.Today;
+                    targetSemester = SemestersList.FirstOrDefault(s => s.Start_date <= today && s.End_date >= today);
+                }
+
+                if (targetSemester == null)
+                {
+                    // 3. Final Safety Fallback: Just in case today's date falls in a gap between semesters
+                    targetSemester = SemestersList.OrderByDescending(s => s.Start_date).FirstOrDefault();
                 }
 
                 if (targetSemester != null)

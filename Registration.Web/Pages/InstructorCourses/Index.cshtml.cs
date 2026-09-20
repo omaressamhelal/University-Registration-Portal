@@ -32,16 +32,28 @@ namespace Registration.Web.Pages.InstructorCourses
         {
             await LoadDropdownDataAsync();
 
-            // If no semester is explicitly chosen via dropdown, default to the newest one chronologically
+            // Robust Default Logic: Open registration first, fallback to today's date, then newest semester
             if (!SelectedSemesterId.HasValue && SemestersList.Any())
             {
-                var newestSemester = SemestersList
-                    .OrderByDescending(s => s.Start_date)
-                    .FirstOrDefault();
+                // 1. Priority: Semester where registration is explicitly open
+                var targetSemester = SemestersList.FirstOrDefault(s => s.Is_Registration_Open == true);
 
-                if (newestSemester != null)
+                if (targetSemester == null)
                 {
-                    SelectedSemesterId = newestSemester.Id;
+                    // 2. Date Logic Fallback: The semester that is currently active today
+                    var today = DateTime.Today;
+                    targetSemester = SemestersList.FirstOrDefault(s => s.Start_date <= today && s.End_date >= today);
+                }
+
+                if (targetSemester == null)
+                {
+                    // 3. Final Safety Fallback: Just in case today's date falls in a gap between semesters
+                    targetSemester = SemestersList.OrderByDescending(s => s.Start_date).FirstOrDefault();
+                }
+
+                if (targetSemester != null)
+                {
+                    SelectedSemesterId = targetSemester.Id;
                 }
             }
 
@@ -56,18 +68,30 @@ namespace Registration.Web.Pages.InstructorCourses
                 // 1. Ensure SemestersList is loaded
                 await LoadDropdownDataAsync();
 
-                // 2. 🌟 Forcefully lock the semester to the globally newest/last semester
-                var newestSemester = SemestersList.OrderByDescending(s => s.Start_date).FirstOrDefault();
-                if (newestSemester != null)
+                // 2. 🌟 Apply the exact same robust logic to determine where the assignment goes
+                var targetSemester = SemestersList.FirstOrDefault(s => s.Is_Registration_Open == true);
+
+                if (targetSemester == null)
                 {
-                    NewAssignment.Semester_Id = newestSemester.Id;
+                    var today = DateTime.Today;
+                    targetSemester = SemestersList.FirstOrDefault(s => s.Start_date <= today && s.End_date >= today);
+                }
+
+                if (targetSemester == null)
+                {
+                    targetSemester = SemestersList.OrderByDescending(s => s.Start_date).FirstOrDefault();
+                }
+
+                if (targetSemester != null)
+                {
+                    NewAssignment.Semester_Id = targetSemester.Id;
                 }
 
                 var response = await _httpClient.PostAsJsonAsync(_apiUrl, NewAssignment);
 
                 if (response.IsSuccessStatusCode)
                 {
-                    TempData["SuccessMessage"] = "Instructor successfully assigned to the course for the latest semester!";
+                    TempData["SuccessMessage"] = "Instructor successfully assigned to the course for the active semester!";
                 }
                 else
                 {

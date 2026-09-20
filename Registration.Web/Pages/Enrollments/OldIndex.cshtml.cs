@@ -157,14 +157,30 @@ namespace Registration.Web.Pages.Enrollments
         {
             if (Enum.TryParse<EnrollmentStatus>(statusName, out var parsedStatus))
             {
-                // 🌟 Dynamically fetch semesters to find the globally newest/last semester ID
-                int newestSemesterId = 0;
+                // 🌟 Dynamically fetch semesters and apply the 3-step priority logic
+                int targetSemesterId = 0;
                 try
                 {
                     var semesters = await _httpClient.GetFromJsonAsync<List<Semester>>("https://127.0.0.1:7126/api/semesters");
                     if (semesters != null && semesters.Any())
                     {
-                        newestSemesterId = semesters.OrderByDescending(s => s.Start_date).First().Id;
+                        var targetSemester = semesters.FirstOrDefault(s => s.Is_Registration_Open == true);
+
+                        if (targetSemester == null)
+                        {
+                            var today = DateTime.Today;
+                            targetSemester = semesters.FirstOrDefault(s => s.Start_date <= today && s.End_date >= today);
+                        }
+
+                        if (targetSemester == null)
+                        {
+                            targetSemester = semesters.OrderByDescending(s => s.Start_date).FirstOrDefault();
+                        }
+
+                        if (targetSemester != null)
+                        {
+                            targetSemesterId = targetSemester.Id;
+                        }
                     }
                 }
                 catch { }
@@ -174,15 +190,15 @@ namespace Registration.Web.Pages.Enrollments
                     StudentId = studentId,
                     CourseId = courseId,
                     StatusId = parsedStatus,
-                    SemesterId = newestSemesterId,
-                    Semester_Id = newestSemesterId
+                    SemesterId = targetSemesterId,
+                    Semester_Id = targetSemesterId
                 };
 
                 var response = await _httpClient.PostAsJsonAsync("https://127.0.0.1:7126/api/enrollments", newEnrollmentPayload);
 
                 if (response.IsSuccessStatusCode)
                 {
-                    TempData["SuccessMessage"] = "New enrollment created successfully in the latest semester.";
+                    TempData["SuccessMessage"] = "New enrollment created successfully in the active semester.";
                 }
                 else
                 {
